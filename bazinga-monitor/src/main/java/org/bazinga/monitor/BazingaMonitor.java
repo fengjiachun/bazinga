@@ -30,6 +30,11 @@ import org.bazinga.common.protocol.BazingaProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * monitor端
+ * @author Lyncc
+ *
+ */
 public class BazingaMonitor {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(BazingaMonitor.class); 
