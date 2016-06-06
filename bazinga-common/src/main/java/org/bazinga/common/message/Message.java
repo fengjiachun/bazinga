@@ -32,7 +32,6 @@ public class Message {
 
     private final long sequence;
     private short sign;
-    private long version; // 版本号
     private Object data;
 
     public Message() {
@@ -55,14 +54,6 @@ public class Message {
         this.sign = sign;
     }
 
-    public long getVersion() {
-        return version;
-    }
-
-    public void setVersion(long version) {
-        this.version = version;
-    }
-
     public Object data() {
         return data;
     }
@@ -76,7 +67,6 @@ public class Message {
         return "Message{" +
                 "sequence=" + sequence +
                 ", sign=" + sign +
-                ", version=" + version +
                 ", data=" + data +
                 '}';
     }

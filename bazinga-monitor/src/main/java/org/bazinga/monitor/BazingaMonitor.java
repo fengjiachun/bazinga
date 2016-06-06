@@ -8,6 +8,7 @@ import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -16,9 +17,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.ReplayingDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -36,6 +36,8 @@ public class BazingaMonitor {
 	
 	private MessageHandler messageHandler = new MessageHandler();
 	
+	private MessageEncoder messageEncoder = new MessageEncoder();
+	
 	private int port;
 	
 	public BazingaMonitor(int port) {
@@ -50,8 +52,8 @@ public class BazingaMonitor {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("protocoldecoder", new StringDecoder());
-                            ch.pipeline().addLast("encoder", new StringEncoder());
+                            ch.pipeline().addLast("encoder", messageEncoder);
+                            ch.pipeline().addLast("decoder", new MessageDecoder());
                             ch.pipeline().addLast(messageHandler);
                         };
                         
@@ -75,6 +77,23 @@ public class BazingaMonitor {
 		}
 		
 	}
+	
+	
+	@ChannelHandler.Sharable
+    static class MessageEncoder extends MessageToByteEncoder<Message> {
+
+        @Override
+        protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
+            byte[] bytes = serializerImpl().writeObject(msg);
+
+            out.writeShort(MAGIC) // MAGIC
+                    .writeByte(msg.sign()) //消息标志位
+                    .writeByte(0) // no-op
+                    .writeLong(0) // 消息id
+                    .writeInt(bytes.length) // 消息体长度
+                    .writeBytes(bytes); //消息体
+        }
+    }
 	
 	
 	static class MessageDecoder extends ReplayingDecoder<MessageDecoder.State> {
