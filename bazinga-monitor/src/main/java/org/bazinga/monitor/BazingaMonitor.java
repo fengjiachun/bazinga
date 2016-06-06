@@ -78,7 +78,16 @@ public class BazingaMonitor {
 		
 		@Override
 		public void channelActive(ChannelHandlerContext ctx) throws Exception {
-			super.channelActive(ctx);
+			logger.info("channel has actived");
+		}
+		
+		
+		
+		@Override
+		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+			if(msg instanceof Message){
+				logger.info(msg.toString());
+			}
 		}
 		
 	}

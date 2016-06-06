@@ -10,4 +10,11 @@
   <artifactId>bazinga-client</artifactId>
   <name>bazinga-client</name>
   <url>http://maven.apache.org</url>
+  
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+	  <artifactId>bazinga-common</artifactId>
+    </dependency>
+  </dependencies>
 </project>
