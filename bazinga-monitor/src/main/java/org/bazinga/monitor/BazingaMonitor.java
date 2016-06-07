@@ -4,9 +4,11 @@ import static org.bazinga.common.protocol.BazingaProtocol.ACK;
 import static org.bazinga.common.protocol.BazingaProtocol.MAGIC;
 import static org.bazinga.common.protocol.BazingaProtocol.OFFLINE_NOTICE;
 import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
+import static org.bazinga.common.protocol.BazingaProtocol.SUBSCRIBE_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,19 +16,25 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.ReplayingDecoder;
+import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
 import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +51,12 @@ public class BazingaMonitor {
 	private MessageHandler messageHandler = new MessageHandler();
 	
 	private MessageEncoder messageEncoder = new MessageEncoder();
+	
+	private ChannelGroup subscribeChannels = new DefaultChannelGroup("subscribers", GlobalEventExecutor.INSTANCE);
+	
+	public static final AttributeKey<HashSet<String>> NETTY_CHANNEL_SUBSCRIBERS= AttributeKey.valueOf("netty.channel.subscribers");
+	
+	public static final AttributeKey<RegistryInfo> NETTY_CHANNEL_PUBLISH= AttributeKey.valueOf("netty.channel.publish");
 	
 	private int port;
 	
@@ -84,17 +98,39 @@ public class BazingaMonitor {
 		
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-			logger.info("receive message from address :{}",ctx.channel().remoteAddress());
+			Channel channel  = ctx.channel();
+			logger.info("receive message from address :{}",channel.remoteAddress());
 			if(msg instanceof Message){
 				Message message = (Message)msg;
-				logger.info(message.toString());
-				if(message.data() instanceof RegistryInfo){
+				
+				switch (message.sign()) {
+				case PUBLISH_SERVICE:
+					
 					RegistryInfo registryInfo = (RegistryInfo)message.data();
-					logger.info(registryInfo.toString());
+					handlerPublishService(channel,registryInfo);
+					break;
+				case SUBSCRIBE_SERVICE:
+					SubScribeInfo subScribeInfo = (SubScribeInfo)message.data();
+					handlerSubscribeService(channel,subScribeInfo);
+					break;
+					
+				default:
+					break;
 				}
 			}
 		}
 		
+		
+		private void handlerSubscribeService(Channel channel,SubScribeInfo subScribeInfo) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		private void handlerPublishService(Channel channel,RegistryInfo registryInfo) {
+			// TODO Auto-generated method stub
+			
+		}
+
 		@Override
 		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 				throws Exception {
