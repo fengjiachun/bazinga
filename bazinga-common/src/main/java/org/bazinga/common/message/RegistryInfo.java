@@ -43,12 +43,28 @@ public class RegistryInfo {
 	public void setRpcServices(List<RpcService> rpcServices) {
 		this.rpcServices = rpcServices;
 	}
+	
 
-	static class Address {
+	@Override
+	public String toString() {
+		return "RegistryInfo [address=" + address + ", appName=" + appName
+				+ ", responsibilityUser=" + responsibilityUser
+				+ ", rpcServices=" + rpcServices + "]";
+	}
+
+
+
+	public static class Address {
 		
 		private String host;
 		
 		private int port;
+		
+		 
+		public Address(String host, int port) {
+			this.host = host;
+			this.port = port;
+		}
 
 		public String getHost() {
 			return host;
@@ -65,14 +81,29 @@ public class RegistryInfo {
 		public void setPort(int port) {
 			this.port = port;
 		}
+
+		@Override
+		public String toString() {
+			return "Address [host=" + host + ", port=" + port + "]";
+		}
 		
 	}
 	
-	static class RpcService {
+	public static class RpcService {
 		
 		private String serviceName;
 		
 		private int weight;
+		
+		public RpcService() {
+			// TODO Auto-generated constructor stub
+		}
+		
+		public RpcService(String serviceName, int weight) {
+			this.serviceName = serviceName;
+			this.weight = weight;
+		}
+
 
 		public String getServiceName() {
 			return serviceName;
@@ -88,6 +119,12 @@ public class RegistryInfo {
 
 		public void setWeight(int weight) {
 			this.weight = weight;
+		}
+
+		@Override
+		public String toString() {
+			return "RpcService [serviceName=" + serviceName + ", weight="
+					+ weight + "]";
 		}
 		
 	}

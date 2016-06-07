@@ -26,6 +26,7 @@ import java.util.List;
 import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
+import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,13 +82,24 @@ public class BazingaMonitor {
 			logger.info("channel has actived");
 		}
 		
-		
-		
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+			logger.info("receive message from address :{}",ctx.channel().remoteAddress());
 			if(msg instanceof Message){
-				logger.info(msg.toString());
+				Message message = (Message)msg;
+				logger.info(message.toString());
+				if(message.data() instanceof RegistryInfo){
+					RegistryInfo registryInfo = (RegistryInfo)message.data();
+					logger.info(registryInfo.toString());
+				}
 			}
+		}
+		
+		@Override
+		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+				throws Exception {
+			logger.error("occur exception:{}",cause.getMessage());
+			ctx.channel().close();
 		}
 		
 	}
@@ -112,10 +124,19 @@ public class BazingaMonitor {
 	
 	static class MessageDecoder extends ReplayingDecoder<MessageDecoder.State> {
 		
+		/**
+		 * 为state()方法中的值赋值
+		 */
+		public MessageDecoder() {
+            super(State.HEADER_MAGIC);
+        }
+		
 		private final BazingaProtocol header = new BazingaProtocol();
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 				List<Object> out) throws Exception {
+			
+			logger.info("/*********************begin decoder****************/");
 			switch (state()) {
 
             case HEADER_MAGIC:
