@@ -13,6 +13,9 @@ public class SubScribeInfo {
 	public void setServiceNames(List<String> serviceNames) {
 		this.serviceNames = serviceNames;
 	}
-	
 
+	@Override
+	public String toString() {
+		return "SubScribeInfo [serviceNames=" + serviceNames + "]";
+	}
 }

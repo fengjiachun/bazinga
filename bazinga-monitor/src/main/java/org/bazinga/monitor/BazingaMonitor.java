@@ -10,6 +10,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -17,25 +18,38 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.ChannelMatcher;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.ReplayingDecoder;
+import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.internal.ConcurrentSet;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
+import org.bazinga.common.message.ProviderInfo;
 import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.message.RegistryInfo.Address;
+import org.bazinga.common.message.RegistryInfo.RpcService;
 import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
+import org.bazinga.common.utils.SystemClock;
+import org.bazinga.monitor.registryInfo.RegistryContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +68,13 @@ public class BazingaMonitor {
 	
 	private ChannelGroup subscribeChannels = new DefaultChannelGroup("subscribers", GlobalEventExecutor.INSTANCE);
 	
-	public static final AttributeKey<HashSet<String>> NETTY_CHANNEL_SUBSCRIBERS= AttributeKey.valueOf("netty.channel.subscribers");
+	private RegistryContext registryContext = new RegistryContext();
 	
-	public static final AttributeKey<RegistryInfo> NETTY_CHANNEL_PUBLISH= AttributeKey.valueOf("netty.channel.publish");
+	private final ConcurrentMap<String, MessageNonAck> messagesNonAck = new ConcurrentHashMap<String, MessageNonAck>();
+	
+	public static final AttributeKey<ConcurrentSet<String>> NETTY_CHANNEL_SUBSCRIBERS = AttributeKey.valueOf("netty.channel.subscribers");
+	
+	public static final AttributeKey<RegistryInfo> NETTY_CHANNEL_PUBLISH = AttributeKey.valueOf("netty.channel.publish");
 	
 	private int port;
 	
@@ -65,6 +83,7 @@ public class BazingaMonitor {
     }
 	
 	public void start(){
+		
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -81,7 +100,7 @@ public class BazingaMonitor {
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
              // 绑定端口，开始接收进来的连接
              ChannelFuture future = sbs.bind(port).sync();  
-             logger.info("monitor begin");
+             logger.info("/*********monitor begin********/ at port:{}",port);
              future.channel().closeFuture().sync();
         } catch (Exception e) {
             bossGroup.shutdownGracefully();
@@ -89,7 +108,8 @@ public class BazingaMonitor {
         }
     }
 	
-	static class MessageHandler extends ChannelInboundHandlerAdapter {
+	@ChannelHandler.Sharable
+    class MessageHandler extends ChannelInboundHandlerAdapter {
 		
 		@Override
 		public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -108,28 +128,60 @@ public class BazingaMonitor {
 					
 					RegistryInfo registryInfo = (RegistryInfo)message.data();
 					handlerPublishService(channel,registryInfo);
+					// 接收到发布信息的时候，要给发布者回复ACK
+					channel.writeAndFlush(new Acknowledge(message.sequence())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 					break;
 				case SUBSCRIBE_SERVICE:
 					SubScribeInfo subScribeInfo = (SubScribeInfo)message.data();
 					handlerSubscribeService(channel,subScribeInfo);
+					channel.writeAndFlush(new Acknowledge(message.sequence())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 					break;
 					
 				default:
 					break;
 				}
+			}else if(msg instanceof Acknowledge){
+				handlerAcknowledge((Acknowledge)msg,channel);
 			}
 		}
 		
-		
-		private void handlerSubscribeService(Channel channel,SubScribeInfo subScribeInfo) {
-			// TODO Auto-generated method stub
+		@Override
+		public void channelWritabilityChanged(ChannelHandlerContext ctx)
+				throws Exception {
+			Channel channel  = ctx.channel();
 			
-		}
+			if(!channel.isWritable()){
+				
+				logger.warn("{} is not writable, high water mask: {}, the number of flushed entries that are not written yet: {}.",channel,channel.config().getWriteBufferHighWaterMark(), channel.unsafe().outboundBuffer().size());
+				channel.config().setAutoRead(false);
+			}else {
+                // 曾经高于高水位线的OutboundBuffer现在已经低于WRITE_BUFFER_LOW_WATER_MARK了
+                logger.warn("{} is writable(rehabilitate), low water mask: {}, the number of flushed entries that are not written yet: {}.",
+                		channel, channel.config().getWriteBufferLowWaterMark(), channel.unsafe().outboundBuffer().size());
 
-		private void handlerPublishService(Channel channel,RegistryInfo registryInfo) {
-			// TODO Auto-generated method stub
-			
+                channel.config().setAutoRead(true);
+            }
 		}
+		
+		
+		
+		@Override
+		public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+			Channel channel  = ctx.channel();
+			
+			Attribute<RegistryInfo> attr = channel.attr(NETTY_CHANNEL_PUBLISH);
+			
+			RegistryInfo registryInfo = attr.get();
+			
+			if(null == registryInfo){
+				return;
+			}
+			
+			Address address = registryInfo.getAddress();
+			
+			handleOfflineNotice(address);
+		}
+		
 
 		@Override
 		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
@@ -140,7 +192,192 @@ public class BazingaMonitor {
 		
 	}
 	
+	/**
+	 * 处理客户端发送过来的ack信息
+	 * 将发过来的ack信息从{@messagesNonAck}这个对象中移除
+	 * @param msg
+	 * @param channel
+	 */
+	private void handlerAcknowledge(Acknowledge msg, Channel channel) {
+		messagesNonAck.remove(key(msg.sequence(), channel));
+	}
+     
+	/**
+	 * 通知订阅者某地址上所有的服务下线
+	 * TODO @problem 这里需要优化，因为有些订阅者并不关注某些地址是否上下线，这样会引起羊群效应
+	 * @param address
+	 */
+    private void handleOfflineNotice(Address address) {
+			
+    	logger.info("notify consumer address {} offine",address);
+    	
+    	Message msg = new Message();
+        msg.sign(OFFLINE_NOTICE);
+        msg.data(address);
+        subscribeChannels.writeAndFlush(msg);
+	}
 	
+    /**
+     * 处理订阅者的服务
+     * 要做的事情有：
+     * 1：将订阅者的channel的attr上绑定该channel订阅的service信息，@reason:这样可以是当提供该服务的提供者上线注册的时候，可以在订阅者的
+     * channelGroup中找到需要消费这种服务的channel发送信息
+     * 2：将已经提供该服务的服务器的地址信息发送给订阅者
+     * @param channel
+     * @param subScribeInfo
+     */
+	private void handlerSubscribeService(Channel channel,SubScribeInfo subScribeInfo) {
+		
+		logger.info("subscribe info from {} and info is {}",channel.remoteAddress().toString(),subScribeInfo.toString());
+		
+		//订阅的内容不为空
+		if(null != subScribeInfo.getServiceNames() && !subScribeInfo.getServiceNames().isEmpty()){
+			
+			//将订阅的信息绑定在channel的attribute属性上
+			attachSubscribeEventOnChannel(channel,subScribeInfo);
+			
+			//
+			subscribeChannels.add(channel);
+			
+			for(String eachServiceName:subScribeInfo.getServiceNames()){
+				
+				ConcurrentMap<Address, Integer>  providerInfos = registryContext.getProviderInfoByServiceName(eachServiceName);
+				
+				if(null == providerInfos || providerInfos.isEmpty()){
+					
+					logger.warn("now this service {} has no hosts which provider this service",eachServiceName);
+					continue;
+				}
+				
+				List<ProviderInfo> providerInfosList = createRpcService(providerInfos); 
+				final Message msg = new Message();
+		        msg.sign(PUBLISH_SERVICE);
+		        msg.data(providerInfosList);
+		        
+		        MessageNonAck msgNonAck = new MessageNonAck(eachServiceName, msg, channel);
+		        // 收到ack后会移除当前key(参见handleAcknowledge), 否则超时超时重发
+		        messagesNonAck.put(msgNonAck.id, msgNonAck);
+		        
+		        channel.writeAndFlush(msg);
+				
+			}
+			
+			
+		}
+		
+	}
+
+	/**
+	 * 将提供者的map信息封装成Entity方便传输
+	 * @param providerInfos
+	 * @return
+	 */
+	private List<ProviderInfo> createRpcService(ConcurrentMap<Address, Integer> providerInfos) {
+		
+		List<ProviderInfo> providerInfoLists = new ArrayList<ProviderInfo>();
+		
+		Set<Entry<Address, Integer>> entries = providerInfos.entrySet();
+		
+		for(Entry<Address, Integer> obj:entries){
+			ProviderInfo providerInfo = new ProviderInfo(obj.getKey(), obj.getValue());
+			providerInfoLists.add(providerInfo);
+		}
+		
+		return providerInfoLists;
+	}
+
+	/**
+	 * 将订阅信息绑定到channel的attribute上
+	 * @param channel
+	 * @param subScribeInfo
+	 * @return
+	 */
+	private static boolean attachSubscribeEventOnChannel(Channel channel,SubScribeInfo subScribeInfo) {
+		
+		List<String> serviceNames = subScribeInfo.getServiceNames();
+		
+		Attribute<ConcurrentSet<String>>  attr = channel.attr(NETTY_CHANNEL_SUBSCRIBERS);
+		
+		ConcurrentSet<String> existSerivceNames = attr.get();
+		
+		if (existSerivceNames == null) {
+			
+            ConcurrentSet<String> newServiceNamesSet = new ConcurrentSet<String>();
+            existSerivceNames = attr.setIfAbsent(newServiceNamesSet);
+            if (existSerivceNames == null) {
+            	existSerivceNames = newServiceNamesSet;
+            }
+        }
+
+        return existSerivceNames.addAll(serviceNames);
+		
+	}
+
+	/**
+	 * 将发布信息绑定到发布者的channel上
+	 * @param channel
+	 * @param registryInfo
+	 */
+	private void handlerPublishService(Channel channel,RegistryInfo registryInfo) {
+		
+		logger.info("Publish service {} from channel {}",registryInfo,channel);
+		
+		attachPublishEventOnChannel(registryInfo, channel);
+
+		registryContext.registryCurrentInfo(registryInfo);
+		
+		List<RpcService> rpcServices = registryInfo.getRpcServices();
+		
+		if(null != rpcServices && !rpcServices.isEmpty()){
+			
+			for(RpcService rpcService : rpcServices){
+				
+				final String serviceName = rpcService.getServiceName();
+				
+				ConcurrentMap<Address, Integer> providerInfos = registryContext.getProviderInfoByServiceName(serviceName);
+				
+				List<ProviderInfo> providerInfosList = createRpcService(providerInfos);
+				
+				final Message msg = new Message();
+                msg.sign(PUBLISH_SERVICE);
+                msg.data(providerInfosList);
+                
+                subscribeChannels.writeAndFlush(msg, new ChannelMatcher() {
+
+                    public boolean matches(Channel channel) {
+                        boolean doSend = isChannelSubscribeOnServiceName(serviceName, channel);
+                        if (doSend) {
+                            MessageNonAck msgNonAck = new MessageNonAck(serviceName, msg, channel);
+                            // 收到ack后会移除当前key(参见handleAcknowledge), 否则超时超时重发
+                            messagesNonAck.put(msgNonAck.id, msgNonAck);
+                        }
+                        return doSend;
+                    }
+                });
+				
+			}
+		}
+		
+	}
+	
+	private static boolean isChannelSubscribeOnServiceName(String serviceName, Channel channel) {
+		
+		ConcurrentSet<String> container = channel.attr(NETTY_CHANNEL_SUBSCRIBERS).get();
+		return container != null && container.contains(serviceName);
+		
+	}
+	
+	private void attachPublishEventOnChannel(RegistryInfo registryInfo,Channel channel) {
+		
+		Attribute<RegistryInfo> attr = channel.attr(NETTY_CHANNEL_PUBLISH);
+		
+		RegistryInfo existInfo = attr.get();
+		
+		if(null == existInfo){
+			attr.setIfAbsent(registryInfo);
+		}
+	}
+
 	@ChannelHandler.Sharable
     static class MessageEncoder extends MessageToByteEncoder<Message> {
 
@@ -156,6 +393,35 @@ public class BazingaMonitor {
                     .writeBytes(bytes); //消息体
         }
     }
+	
+	static class MessageNonAck {
+		
+		private final String id;
+		private final String serviceName;
+        private final Message msg;
+        private final Channel channel;
+        private final long timestamp = SystemClock.millisClock().now();
+
+        public MessageNonAck(String serviceName, Message msg, Channel channel) {
+            this.serviceName = serviceName;
+            this.msg = msg;
+            this.channel = channel;
+
+            id = key(msg.sequence(), channel);
+        }
+
+		@Override
+		public String toString() {
+			return "MessageNonAck [id=" + id + ", serviceName=" + serviceName
+					+ ", msg=" + msg + ", channel=" + channel + ", timestamp="
+					+ timestamp + "]";
+		}
+        
+	}
+	
+	private static String key(long sequence, Channel channel) {
+		return String.valueOf(sequence) + '-' + channel.id().asShortText();
+	}
 	
 	
 	static class MessageDecoder extends ReplayingDecoder<MessageDecoder.State> {
@@ -193,6 +459,7 @@ public class BazingaMonitor {
             case BODY:
                 switch (header.sign()) {
                     case PUBLISH_SERVICE:
+                    case SUBSCRIBE_SERVICE:
                     case OFFLINE_NOTICE: {
                         byte[] bytes = new byte[header.bodyLength()];
                         in.readBytes(bytes);
@@ -222,7 +489,8 @@ public class BazingaMonitor {
 		
 		private static void checkMagic(short magic) {
 			if (MAGIC != magic) {
-                throw new BazingaException();
+				logger.error("Magic is not match");
+                throw new BazingaException("magic value is not equal "+MAGIC);
             }
 		}
 
@@ -247,5 +515,44 @@ public class BazingaMonitor {
 	    }
 	
 	
+	 
+	private class AckTimeoutScanner implements Runnable {
+		
+		public void run() {
+			for(;;){
+				try {
+					
+					
+					for(MessageNonAck mna:messagesNonAck.values()){
+						//查看10秒内没有ack的信息，进行重发
+						if(SystemClock.millisClock().now() - mna.timestamp > TimeUnit.SECONDS.toMillis(10)){
+							
+							if (messagesNonAck.remove(mna.id) == null) {
+                                continue;
+                            }
+							
+							
+							if (mna.channel.isActive()) {
+								 logger.warn("message {} send failed",mna);
+                                MessageNonAck msgNonAck = new MessageNonAck(mna.serviceName, mna.msg, mna.channel);
+                                messagesNonAck.put(msgNonAck.id, msgNonAck);
+                                mna.channel.writeAndFlush(mna.msg)
+                                        .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                            }
+						}
+					}
+					Thread.sleep(900);
+				} catch (Exception e) {
+					logger.error("when loop ack message occur exception:{}",e.getMessage());
+				}
+			}
+		}
+	 }
+	
+	{
+		Thread t = new Thread(new AckTimeoutScanner(), "ack.timeout.scanner");
+        t.setDaemon(true);
+        t.start();
+	}
 
 }
