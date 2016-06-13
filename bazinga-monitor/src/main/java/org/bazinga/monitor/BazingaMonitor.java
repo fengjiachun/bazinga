@@ -504,18 +504,14 @@ public class BazingaMonitor {
         }
 	}
 	
-	 public static void main(String[] args) throws Exception {
-	        int port;
-	        if (args.length > 0) {
-	            port = Integer.parseInt(args[0]);
-	        } else {
-	            port = 8080;
-	        }
-	        new BazingaMonitor(port).start();
-	    }
-	
-	
-	 
+	public RegistryContext getRegistryContext() {
+		return registryContext;
+	}
+
+	public void setRegistryContext(RegistryContext registryContext) {
+		this.registryContext = registryContext;
+	}
+
 	private class AckTimeoutScanner implements Runnable {
 		
 		public void run() {

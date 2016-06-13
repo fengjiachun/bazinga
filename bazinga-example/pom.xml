@@ -11,4 +11,19 @@
   <name>bazinga-example</name>
   <url>http://maven.apache.org</url>
   
+  <dependencies>
+    <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>bazinga-common</artifactId>
+    </dependency>
+    <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>bazinga-client</artifactId>
+    </dependency>
+    <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>bazinga-monitor</artifactId>
+    </dependency>
+  </dependencies>
+  
 </project>

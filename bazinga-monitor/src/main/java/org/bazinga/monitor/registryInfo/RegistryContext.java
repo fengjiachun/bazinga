@@ -17,12 +17,14 @@ import org.bazinga.common.message.RegistryInfo.RpcService;
  */
 public class RegistryContext {
 	
+	//TODO
 	/******一个提供服务的地址，提供的所有服务******/
 	private ConcurrentMap<Address,ConcurrentSet<RpcService>> globalInfo = new ConcurrentHashMap<RegistryInfo.Address, ConcurrentSet<RpcService>>();
 	
 	/************一个服务，他是由哪些地址提供的,每个地址的权重多大************/
 	private ConcurrentMap<String,ConcurrentMap<Address,Integer>> serviceInfo = new ConcurrentHashMap<String, ConcurrentMap<Address,Integer>>();
 	
+	//TODO
 	/*************一个服务被哪些消费者消费****************/
 	private ConcurrentMap<String,ArrayList<Address>> comsumerInfo = new ConcurrentHashMap<String, ArrayList<Address>>();
 	
@@ -69,8 +71,30 @@ public class RegistryContext {
 			}
 		}
 	}
-    
-	
+
+	public ConcurrentMap<Address, ConcurrentSet<RpcService>> getGlobalInfo() {
+		return globalInfo;
+	}
+
+	public void setGlobalInfo(ConcurrentMap<Address, ConcurrentSet<RpcService>> globalInfo) {
+		this.globalInfo = globalInfo;
+	}
+
+	public ConcurrentMap<String, ConcurrentMap<Address, Integer>> getServiceInfo() {
+		return serviceInfo;
+	}
+
+	public void setServiceInfo(ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceInfo) {
+		this.serviceInfo = serviceInfo;
+	}
+
+	public ConcurrentMap<String, ArrayList<Address>> getComsumerInfo() {
+		return comsumerInfo;
+	}
+
+	public void setComsumerInfo(ConcurrentMap<String, ArrayList<Address>> comsumerInfo) {
+		this.comsumerInfo = comsumerInfo;
+	}
 	
 
 }
