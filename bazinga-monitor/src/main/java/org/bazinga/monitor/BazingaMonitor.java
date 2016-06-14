@@ -43,6 +43,7 @@ import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
 import org.bazinga.common.message.ProviderInfo;
+import org.bazinga.common.message.ProviderInfos;
 import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
@@ -249,7 +250,7 @@ public class BazingaMonitor {
 					continue;
 				}
 				
-				List<ProviderInfo> providerInfosList = createRpcService(providerInfos); 
+				ProviderInfos providerInfosList = createRpcService(providerInfos,eachServiceName); 
 				final Message msg = new Message();
 		        msg.sign(PUBLISH_SERVICE);
 		        msg.data(providerInfosList);
@@ -270,9 +271,10 @@ public class BazingaMonitor {
 	/**
 	 * 将提供者的map信息封装成Entity方便传输
 	 * @param providerInfos
+	 * @param eachServiceName 
 	 * @return
 	 */
-	private List<ProviderInfo> createRpcService(ConcurrentMap<Address, Integer> providerInfos) {
+	private ProviderInfos createRpcService(ConcurrentMap<Address, Integer> providerInfos, String eachServiceName) {
 		
 		List<ProviderInfo> providerInfoLists = new ArrayList<ProviderInfo>();
 		
@@ -283,7 +285,7 @@ public class BazingaMonitor {
 			providerInfoLists.add(providerInfo);
 		}
 		
-		return providerInfoLists;
+		return new ProviderInfos(eachServiceName,providerInfoLists);
 	}
 
 	/**
@@ -336,7 +338,7 @@ public class BazingaMonitor {
 				
 				ConcurrentMap<Address, Integer> providerInfos = registryContext.getProviderInfoByServiceName(serviceName);
 				
-				List<ProviderInfo> providerInfosList = createRpcService(providerInfos);
+				ProviderInfos providerInfosList = createRpcService(providerInfos,serviceName);
 				
 				final Message msg = new Message();
                 msg.sign(PUBLISH_SERVICE);
