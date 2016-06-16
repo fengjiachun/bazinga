@@ -20,7 +20,7 @@ public class Request extends BytesHolder {
 		this.invokeId = invokeId;
 	}
 
-	public long getInvokeId() {
+	public long invokeId() {
 		return invokeId;
 	}
 

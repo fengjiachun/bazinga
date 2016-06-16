@@ -38,7 +38,7 @@ public class ProviderHandler extends ChannelInboundHandlerAdapter {
 			messageWrapper.setResult("Test result");
 
 			byte[] results = serializerImpl().writeObject(messageWrapper);
-			Response response = Response.newInstance(request.getInvokeId(),
+			Response response = Response.newInstance(request.invokeId(),
 					Status.OK, results);
 
 			channel.writeAndFlush(response);

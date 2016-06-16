@@ -36,11 +36,9 @@ import org.bazinga.common.protocol.BazingaProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements
-		Registry {
+public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements Registry {
 
-	protected static final Logger logger = LoggerFactory
-			.getLogger(DefaultConsumerRegistry.class);
+	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerRegistry.class);
 
 	private SubScribeInfo info;
 

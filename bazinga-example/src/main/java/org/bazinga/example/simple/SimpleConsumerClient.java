@@ -3,7 +3,7 @@ package org.bazinga.example.simple;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bazinga.client.comsumer.DefaultConsumerRegistry;
+import org.bazinga.client.comsumer.DefaultConsumer;
 import org.bazinga.common.message.SubScribeInfo;
 
 public class SimpleConsumerClient {
@@ -25,7 +25,7 @@ public class SimpleConsumerClient {
 		List<String> servicesNames = new ArrayList<String>();
 		servicesNames.add("HelloWorldService");
 		info.setServiceNames(servicesNames);
-		new DefaultConsumerRegistry(info).connectToRegistryServer(port, "127.0.0.1");
+		new DefaultConsumer(info).connectToRegistryServer(port, "127.0.0.1");
 	}
 
 }

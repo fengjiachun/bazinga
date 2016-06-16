@@ -27,4 +27,15 @@ public abstract class AbstractCommonClient {
 		serviceChannel.put(serviceName, concurrentSet);
 	}
 
+	public ConcurrentSet<WeightChannel> getAllMatchedChannel(String serviceName) {
+		ConcurrentSet<WeightChannel> channels = serviceChannel.get(serviceName);
+		if(null == channels){
+			channels = new ConcurrentSet<WeightChannel>();
+			serviceChannel.put(serviceName, channels);
+		}
+		return channels;
+		
+	}
+	
+
 }

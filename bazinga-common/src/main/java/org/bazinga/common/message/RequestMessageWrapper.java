@@ -10,11 +10,26 @@ public class RequestMessageWrapper implements Serializable {
 	 */
 	private static final long serialVersionUID = -6268712308008868137L;
 	
+	private static final String DEFAULT_APP_NAME = "bazinga";
+	
 	private String appName;
 	
 	private String serviceName;
 	
 	private Object[] args;
+	
+	public RequestMessageWrapper(String serviceName,
+			Object[] args) {
+		
+		this(DEFAULT_APP_NAME,serviceName,args);
+	}
+
+	public RequestMessageWrapper(String appName, String serviceName,
+			Object[] args) {
+		this.appName = appName;
+		this.serviceName = serviceName;
+		this.args = args;
+	}
 
 	public String getAppName() {
 		return appName;
