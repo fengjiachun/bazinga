@@ -10,10 +10,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import org.bazinga.client.decoder.ConsumerDecoder;
+import org.bazinga.client.encoder.RequestEncoder;
 import org.bazinga.common.message.SubScribeInfo;
 
 
 public class DefaultConsumer extends DefaultConsumerRegistry {
+	
+	private RequestEncoder encoder = new RequestEncoder();
 
 	public DefaultConsumer(SubScribeInfo info) {
 		super(info);
@@ -31,6 +35,10 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 						@Override
 						public void initChannel(SocketChannel ch)
 								throws Exception {
+							ch.pipeline().addLast(
+									new ConsumerDecoder(),
+									encoder,
+			                        handler);
 						}
 					});
 

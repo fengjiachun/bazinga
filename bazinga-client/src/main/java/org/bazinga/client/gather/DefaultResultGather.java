@@ -79,9 +79,17 @@ public class DefaultResultGather {
     	
 	}
 
-    private void doReceived(Response response2) {
-		// TODO Auto-generated method stub
-		
+    private void doReceived(Response response) {
+    	
+    	this.response = response;
+    	
+    	final ReentrantLock _lock = lock;
+        _lock.lock();
+        try {
+            doneCondition.signal();
+        } finally {
+            _lock.unlock();
+        }
 	}
 
 	/**
