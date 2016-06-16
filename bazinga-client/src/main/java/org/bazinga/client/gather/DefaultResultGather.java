@@ -75,8 +75,6 @@ public class DefaultResultGather {
     	defaultResultGather.doReceived(response);
         return true;
     	
-    	
-    	
 	}
 
     private void doReceived(Response response) {

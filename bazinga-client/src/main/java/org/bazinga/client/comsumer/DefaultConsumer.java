@@ -1,5 +1,11 @@
 package org.bazinga.client.comsumer;
 
+import org.bazinga.client.decoder.ConsumerDecoder;
+import org.bazinga.client.encoder.RequestEncoder;
+import org.bazinga.common.message.SubScribeInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -10,14 +16,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-import org.bazinga.client.decoder.ConsumerDecoder;
-import org.bazinga.client.encoder.RequestEncoder;
-import org.bazinga.common.message.SubScribeInfo;
-
 
 public class DefaultConsumer extends DefaultConsumerRegistry {
 	
+	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumer.class);
+	
 	private RequestEncoder encoder = new RequestEncoder();
+	
+	private ConsumerHandler handler = new ConsumerHandler();
 
 	public DefaultConsumer(SubScribeInfo info) {
 		super(info);
