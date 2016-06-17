@@ -28,6 +28,7 @@ public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 		
 		if(msg instanceof Response){
 			try {
+				logger.warn("handler这里执行了~", msg, channel);
 				handleResponse((Response)msg,channel);
 			} catch (Exception e) {
 				logger.error("handler response occur exception",e.getMessage());
@@ -44,6 +45,18 @@ public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 		response.result(serializerImpl().readObject(response.bytes(), ResultMessageWrapper.class));
 		response.bytes(null);
 		DefaultResultGather.received(channel, response);
+	}
+	
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception {
+		logger.info("发送请求失败，发生了异常：{}",cause.getMessage());
+		ctx.channel().close();
+	}
+	
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		logger.info("调用者的channel激活");
 	}
 
 }

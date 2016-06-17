@@ -46,7 +46,20 @@ public class ProviderHandler extends ChannelInboundHandlerAdapter {
 		}
 
 		ReferenceCountUtil.release(msg);
-
+	}
+	
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		Channel channel = ctx.channel();
+		logger.info("来自{}已经建立好连接，准备请求服务", channel.remoteAddress());
+		super.channelActive(ctx);
+	}
+	
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception {
+		logger.error("接收到调用者请求的时候发生了异常{}",cause.getMessage());
+		ctx.channel().close();
 	}
 
 }

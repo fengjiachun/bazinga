@@ -44,7 +44,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 
 	private MessageEncoder messageEncoder = new MessageEncoder();
 
-	private ConsumerHandler consumerHandler = new ConsumerHandler();
+	private ConsumerRegistryHandler consumerHandler = new ConsumerRegistryHandler();
 
 	public DefaultConsumerRegistry(SubScribeInfo info) {
 		this.info = info;
@@ -165,7 +165,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 		}
 	}
 
-	class ConsumerHandler extends ChannelInboundHandlerAdapter {
+	class ConsumerRegistryHandler extends ChannelInboundHandlerAdapter {
 
 		@Override
 		public void channelActive(ChannelHandlerContext ctx) throws Exception {

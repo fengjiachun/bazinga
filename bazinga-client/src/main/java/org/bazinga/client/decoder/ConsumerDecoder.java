@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConsumerDecoder extends ReplayingDecoder<ConsumerDecoder.State> {
 	
-protected static final Logger logger = LoggerFactory.getLogger(ProviderDecoder.class); 
+protected static final Logger logger = LoggerFactory.getLogger(ConsumerDecoder.class); 
 	
 	private static final int MAX_BODY_SIZE = 1024 * 1024 * 5;
 	

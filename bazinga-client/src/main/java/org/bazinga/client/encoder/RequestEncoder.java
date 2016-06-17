@@ -3,11 +3,13 @@ package org.bazinga.client.encoder;
 import static org.bazinga.common.protocol.BazingaProtocol.MAGIC;
 import static org.bazinga.common.protocol.BazingaProtocol.REQUEST;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 import org.bazinga.common.message.Request;
 
+@ChannelHandler.Sharable
 public class RequestEncoder extends MessageToByteEncoder<Request>{
 
 	@Override

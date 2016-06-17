@@ -3,7 +3,7 @@ package org.bazinga.example.simple;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bazinga.client.provider.DefaultProviderRegistry;
+import org.bazinga.client.provider.DefaultProvider;
 import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
@@ -33,7 +33,9 @@ public class SimpleProviderClient {
         rpcServices.add(rpcService1);
         rpcServices.add(rpcService2);
         info.setRpcServices(rpcServices);
-        new DefaultProviderRegistry(info).connectToRegistryServer(port, "127.0.0.1");
+        DefaultProvider defaultProvider = new DefaultProvider(info);
+        defaultProvider.connectToRegistryServer(port, "127.0.0.1");
+        defaultProvider.start();
     }
 
 }

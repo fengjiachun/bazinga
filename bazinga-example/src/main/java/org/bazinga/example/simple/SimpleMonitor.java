@@ -88,12 +88,8 @@ public class SimpleMonitor {
 							}
 									
 						}
-						
 					}
-					
-					
 				}
-				
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e) {

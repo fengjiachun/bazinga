@@ -1,9 +1,11 @@
 package org.bazinga.client.common.utils;
 
+import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import io.netty.channel.Channel;
 import io.netty.util.internal.ConcurrentSet;
 
 import org.bazinga.client.comsumer.DefaultConsumer;
+import org.bazinga.client.dispatcher.DefaultDispatcher;
 import org.bazinga.client.gather.DefaultResultGather;
 import org.bazinga.client.loadbalance.LoadBalance;
 import org.bazinga.common.exception.BazingaException;
@@ -29,12 +31,13 @@ public class CommonClient extends DefaultConsumer implements DefaultCommonClient
 		}
 		
 		final Request request = new Request();
-		request.setMessageWrapper(new RequestMessageWrapper(serviceName,args));
-		
+		RequestMessageWrapper message = new RequestMessageWrapper(serviceName,args);
+		request.setMessageWrapper(message);
+		request.bytes(serializerImpl().writeObject(message));
 		Channel channel = loadBalance(channels);
 		
 		//TODO 每个方法特殊的超时时间没有设置
-		DefaultResultGather defaultResultGather = new DefaultResultGather(channel, request);
+		DefaultResultGather defaultResultGather = new DefaultDispatcher().dispatcher(channel, request);
 		
 		return defaultResultGather.getResult();
 		

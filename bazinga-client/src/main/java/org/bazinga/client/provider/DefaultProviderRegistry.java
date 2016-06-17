@@ -34,7 +34,7 @@ public class DefaultProviderRegistry implements Registry {
 	
 	private MessageEncoder messageEncoder = new MessageEncoder();
 	
-	private ProviderHandler provider = new ProviderHandler();
+	private ProviderRegistryHandler provider = new ProviderRegistryHandler();
 	
 	private RegistryInfo info;
 	
@@ -82,7 +82,7 @@ public class DefaultProviderRegistry implements Registry {
 	        }
 	  }
 	 
-	 class ProviderHandler extends ChannelInboundHandlerAdapter {
+	 class ProviderRegistryHandler extends ChannelInboundHandlerAdapter {
 		 
 		@Override
 		public void channelActive(ChannelHandlerContext ctx) throws Exception {

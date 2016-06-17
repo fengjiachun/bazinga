@@ -1,14 +1,15 @@
 package org.bazinga.client.encoder;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
 import static org.bazinga.common.protocol.BazingaProtocol.MAGIC;
 import static org.bazinga.common.protocol.BazingaProtocol.RESPONSE;
 
 import org.bazinga.common.message.Response;
 
+@ChannelHandler.Sharable
 public class ResponseEncoder extends MessageToByteEncoder<Response> {
 	
 	

@@ -38,9 +38,9 @@ public class DefaultResultGather {
 	
     private final Condition doneCondition = lock.newCondition();
     
-    public static final long DEFAULT_TIMEOUT =  3 * 1000;
+    public static final long DEFAULT_TIMEOUT =  5 * 1000;
     
-    private final long invokeId; // request id, 组播的场景可重复
+    private final long invokeId;
     private final Channel channel;
     private final Request request;
     private final long timeoutMillis;
@@ -64,6 +64,8 @@ public class DefaultResultGather {
 	}
     
     public static boolean received(Channel channel, Response response) {
+    	
+    	logger.warn("这里执行了~", response, channel);
     	
     	long invokeId = response.id();
     	DefaultResultGather defaultResultGather = resultsGathers.remove(invokeId);
@@ -162,10 +164,10 @@ public class DefaultResultGather {
 		
 	}
 	
-	static {
-        Thread t = new Thread(new TimeoutScanner(), "timeout.scanner");
-        t.setDaemon(true);
-        t.start();
-    }
+//	static {
+//        Thread t = new Thread(new TimeoutScanner(), "timeout.scanner");
+//        t.setDaemon(true);
+//        t.start();
+//    }
 
 }

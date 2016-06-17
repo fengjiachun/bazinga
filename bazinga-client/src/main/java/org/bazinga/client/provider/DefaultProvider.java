@@ -13,6 +13,7 @@ import java.net.InetSocketAddress;
 
 import org.bazinga.client.decoder.ProviderDecoder;
 import org.bazinga.client.encoder.ResponseEncoder;
+import org.bazinga.client.handler.ProviderHandler;
 import org.bazinga.common.message.RegistryInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
