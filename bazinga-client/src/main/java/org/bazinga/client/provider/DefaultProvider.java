@@ -1,20 +1,31 @@
 package org.bazinga.client.provider;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.DefaultMessageSizeEstimator;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.DefaultThreadFactory;
+import io.netty.util.internal.PlatformDependent;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadFactory;
 
 import org.bazinga.client.decoder.ProviderDecoder;
 import org.bazinga.client.encoder.ResponseEncoder;
 import org.bazinga.client.handler.ProviderHandler;
+import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
+import org.bazinga.common.utils.NativeSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,37 +39,102 @@ public class DefaultProvider extends DefaultProviderRegistry {
 	
 	private ProviderHandler handler = new ProviderHandler();
 	
+	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
+	
+	private ServerBootstrap bootstrap;
+	
+	private EventLoopGroup boss;
+    private EventLoopGroup worker;
+    
+    private final boolean nativeEt;
+    
+    private int nWorkers;
+    
+    public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+    
+    public static final int READER_IDLE_TIME_SECONDS =  60;
+    
+    protected volatile ByteBufAllocator allocator;
+	
 
 	public DefaultProvider(RegistryInfo info) {
 		super(info);
 		this.providerPort = info.getAddress().getPort();
+		this.nWorkers = AVAILABLE_PROCESSORS << 1;
+		this.nativeEt = true;
+		doInit();
 	}
 	
-	public void start(){
-		EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            ServerBootstrap sbs = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(providerPort))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                        	ch.pipeline().addLast(
-                                    //TODO
-                                    new ProviderDecoder(),
-                                    encoder,
-                                    handler);
-                        };
-                        
-                    }).option(ChannelOption.SO_BACKLOG, 128)   
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
-             // 绑定端口，开始接收进来的连接
-             ChannelFuture future = sbs.bind(providerPort).sync();  
-             logger.info("/*********provider begin********/ at port:{}",providerPort);
-             future.channel().closeFuture().sync();
-        } catch (Exception e) {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+	private void doInit() {
+		ThreadFactory bossFactory = new DefaultThreadFactory("jupiter.acceptor.boss");
+        ThreadFactory workerFactory = new DefaultThreadFactory("jupiter.acceptor.worker");
+        boss = initEventLoopGroup(1, bossFactory);
+        worker = initEventLoopGroup(nWorkers, workerFactory);
+        bootstrap = new ServerBootstrap().group(boss, worker);
+        //使用池化的directBuffer
+        allocator = new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
+        
+        bootstrap.childOption(ChannelOption.ALLOCATOR, allocator)
+        .childOption(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT);
+        
+        if (boss instanceof EpollEventLoopGroup) {
+            ((EpollEventLoopGroup) boss).setIoRatio(100);
+        } else if (boss instanceof NioEventLoopGroup) {
+            ((NioEventLoopGroup) boss).setIoRatio(100);
         }
+        if (worker instanceof EpollEventLoopGroup) {
+            ((EpollEventLoopGroup) worker).setIoRatio(100);
+        } else if (worker instanceof NioEventLoopGroup) {
+            ((NioEventLoopGroup) worker).setIoRatio(100);
+        }
+        
+        bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
+        bootstrap.option(ChannelOption.SO_REUSEADDR, true);
+
+        // child options
+        bootstrap.childOption(ChannelOption.SO_REUSEADDR, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
+	}
+	
+	protected EventLoopGroup initEventLoopGroup(int workers,ThreadFactory bossFactory) {
+		return isNativeEt() ? new EpollEventLoopGroup(workers, bossFactory) : new NioEventLoopGroup(workers, bossFactory);
+	}
+
+	private boolean isNativeEt() {
+		return nativeEt && NativeSupport.isSupportNativeET();
+	}
+
+	public void start() throws InterruptedException{
+        ChannelFuture future = bind(new InetSocketAddress(providerPort)).sync();
+		
+		logger.info("服务端即将启动服务~");
+		
+		 future.channel().closeFuture().sync();
+	}
+
+	private ChannelFuture bind(InetSocketAddress inetSocketAddress) {
+		ServerBootstrap boot = bootstrap;
+
+        if (isNativeEt()) {
+            boot.channel(EpollServerSocketChannel.class);
+        } else {
+            boot.channel(NioServerSocketChannel.class);
+        }
+        boot.childHandler(new ChannelInitializer<SocketChannel>() {
+
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+            	ch.pipeline().addLast(
+            			new IdleStateChecker(timer, READER_IDLE_TIME_SECONDS, 0, 0),
+            			idleStateTrigger
+            			,new ProviderDecoder()
+            			,encoder
+            			,handler);
+            }
+        });
+        return boot.bind(inetSocketAddress);
 	}
 	
 	

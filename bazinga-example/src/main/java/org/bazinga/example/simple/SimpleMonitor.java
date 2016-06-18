@@ -2,6 +2,7 @@ package org.bazinga.example.simple;
 
 import io.netty.util.internal.ConcurrentSet;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -21,6 +22,8 @@ public class SimpleMonitor {
 			.getLogger(DefaultConsumerRegistry.class);
 
 	private static BazingaMonitor bazingaMonitor = null;
+	
+	private static final SimpleDateFormat simpleDateFormat =  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 
 	public static void main(String[] args) throws InterruptedException {
 		int port;
@@ -58,7 +61,7 @@ public class SimpleMonitor {
 					ConcurrentMap<Address,ConcurrentSet<RpcService>> concurrentMap = registryContext.getGlobalInfo();
 					
 					if(concurrentMap.keySet().isEmpty()){
-						logger.info("current time {} has no any address provider serivce",new Date());
+						logger.info("当前时间 {} 没有地址提供任何服务",simpleDateFormat.format(new Date()));
 					}else{
 						Set<Entry<Address, ConcurrentSet<RpcService>>> entries = concurrentMap.entrySet();
 						
@@ -66,7 +69,7 @@ public class SimpleMonitor {
 							Address address = entry.getKey();
 							ConcurrentSet<RpcService> servicesList = entry.getValue();
 							for(RpcService rpcService :servicesList){
-								logger.info("current time {} address is {} provider service {}",new Date(),address,rpcService.getServiceName());
+								logger.info("当前时间 {} 地址是 {} 提供{}服务",simpleDateFormat.format(new Date()),address,rpcService.getServiceName());
 							}
 							
 						}
@@ -76,7 +79,7 @@ public class SimpleMonitor {
 					ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceMaps = registryContext.getServiceInfo();
 					
 					if(serviceMaps.keySet().isEmpty()){
-						logger.info("current time {} has no any serivce",new Date());
+						logger.info("当前时间 {}没有任何服务",simpleDateFormat.format(new Date()));
 					}else{
 						Set<Entry<String, ConcurrentMap<Address, Integer>>> entries = serviceMaps.entrySet();
 						for(Entry<String, ConcurrentMap<Address, Integer>> entry : entries){
@@ -84,7 +87,7 @@ public class SimpleMonitor {
 							ConcurrentMap<Address, Integer> details = entry.getValue();
 							Set<Entry<Address, Integer>> detailsSet = details.entrySet();
 							for(Entry<Address, Integer> eachDetail : detailsSet){
-								logger.info("service {} ,provider by address {} and weight is {}",serviceName,eachDetail.getKey(),eachDetail.getValue());
+								logger.info("服务 {} ,是由{}该地址提供的并且它的负重是{}",serviceName,eachDetail.getKey(),eachDetail.getValue());
 							}
 									
 						}

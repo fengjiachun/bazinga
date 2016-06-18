@@ -17,6 +17,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.ChannelMatcher;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -27,19 +29,23 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.ConcurrentSet;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.bazinga.common.exception.BazingaException;
+import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
 import org.bazinga.common.message.ProviderInfo;
@@ -49,6 +55,9 @@ import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
 import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
+import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
+import org.bazinga.common.utils.NamedThreadFactory;
+import org.bazinga.common.utils.NativeSupport;
 import org.bazinga.common.utils.SystemClock;
 import org.bazinga.monitor.registryInfo.RegistryContext;
 import org.slf4j.Logger;
@@ -59,9 +68,11 @@ import org.slf4j.LoggerFactory;
  * @author Lyncc
  *
  */
-public class BazingaMonitor {
+public class BazingaMonitor extends DefaultMonitorConfig {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(BazingaMonitor.class); 
+	
+	private final boolean nativeEt;
 	
 	private MessageHandler messageHandler = new MessageHandler();
 	
@@ -77,36 +88,17 @@ public class BazingaMonitor {
 	
 	public static final AttributeKey<RegistryInfo> NETTY_CHANNEL_PUBLISH = AttributeKey.valueOf("netty.channel.publish");
 	
-	private int port;
+	protected final HashedWheelTimer timer = new HashedWheelTimer(new NamedThreadFactory("monitor.timer"));
+	
+	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
+	
+	public static final int READER_IDLE_TIME_SECONDS =  60;
+	
 	
 	public BazingaMonitor(int port) {
-        this.port = port;
-    }
-	
-	public void start(){
-		
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            ServerBootstrap sbs = new ServerBootstrap().group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).localAddress(new InetSocketAddress(port))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("encoder", messageEncoder);
-                            ch.pipeline().addLast("decoder", new MessageDecoder());
-                            ch.pipeline().addLast(messageHandler);
-                        };
-                        
-                    }).option(ChannelOption.SO_BACKLOG, 128)   
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
-             // 绑定端口，开始接收进来的连接
-             ChannelFuture future = sbs.bind(port).sync();  
-             logger.info("/*********monitor begin********/ at port:{}",port);
-             future.channel().closeFuture().sync();
-        } catch (Exception e) {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
-        }
+		super(new InetSocketAddress(port));
+		nativeEt = true;
+		init();
     }
 	
 	@ChannelHandler.Sharable
@@ -164,22 +156,17 @@ public class BazingaMonitor {
             }
 		}
 		
-		
-		
 		@Override
 		public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 			Channel channel  = ctx.channel();
 			
 			Attribute<RegistryInfo> attr = channel.attr(NETTY_CHANNEL_PUBLISH);
-			
 			RegistryInfo registryInfo = attr.get();
-			
 			if(null == registryInfo){
 				return;
 			}
 			
 			Address address = registryInfo.getAddress();
-			
 			handleOfflineNotice(address);
 		}
 		
@@ -551,6 +538,56 @@ public class BazingaMonitor {
 		Thread t = new Thread(new AckTimeoutScanner(), "ack.timeout.scanner");
         t.setDaemon(true);
         t.start();
+	}
+
+	@Override
+	protected EventLoopGroup initEventLoopGroup(int workers,ThreadFactory bossFactory) {
+		return isNativeEt() ? new EpollEventLoopGroup(workers, bossFactory) : new NioEventLoopGroup(workers, bossFactory);
+	}
+
+	private boolean isNativeEt() {
+		return nativeEt && NativeSupport.isSupportNativeET();
+	}
+
+	@Override
+	protected ChannelFuture bind(SocketAddress localAddress) {
+		ServerBootstrap boot = bootstrap();
+
+        if (isNativeEt()) {
+            boot.channel(EpollServerSocketChannel.class);
+        } else {
+            boot.channel(NioServerSocketChannel.class);
+        }
+        boot.childHandler(new ChannelInitializer<SocketChannel>() {
+
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+            	ch.pipeline().addLast(
+            			new IdleStateChecker(timer, READER_IDLE_TIME_SECONDS, 0, 0),
+            			idleStateTrigger
+            			,messageEncoder
+            			,new MessageDecoder()
+            			,messageHandler);
+            }
+        });
+
+        setOptions();
+
+        return boot.bind(localAddress);
+	}
+
+	private void setOptions() {
+		ServerBootstrap boot = bootstrap();
+
+        // parent options
+        boot.option(ChannelOption.SO_BACKLOG, 1024);
+        boot.option(ChannelOption.SO_REUSEADDR, true);
+
+        // child options
+        boot.childOption(ChannelOption.SO_REUSEADDR, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
 	}
 
 }
