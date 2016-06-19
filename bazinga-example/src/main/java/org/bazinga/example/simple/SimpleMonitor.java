@@ -23,7 +23,7 @@ public class SimpleMonitor {
 
 	private static BazingaMonitor bazingaMonitor = null;
 	
-	private static final SimpleDateFormat simpleDateFormat =  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+	private static final SimpleDateFormat simpleDateFormat =  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 	public static void main(String[] args) throws InterruptedException {
 		int port;
@@ -42,7 +42,7 @@ public class SimpleMonitor {
 	public static class MonitorScanner implements Runnable {
 
 		public void run() {
-			logger.info("/*******loop monitor begin**********/");
+			logger.info("/*******监控者开始循环注册信息**********/");
 			
 			for(;;){
 				if(null == bazingaMonitor){

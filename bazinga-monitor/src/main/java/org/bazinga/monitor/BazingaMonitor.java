@@ -161,16 +161,18 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 		}
 		
 		
-		//TODO 没有将registry中的注册消除 2016年6月19日08:57:33晚上修改~
 		@Override
 		public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 			Channel channel  = ctx.channel();
+			
+			
 			
 			Attribute<RegistryInfo> attr = channel.attr(NETTY_CHANNEL_PUBLISH);
 			RegistryInfo registryInfo = attr.get();
 			if(null == registryInfo){
 				return;
 			}
+			registryContext.removeRegistryInfo(registryInfo);
 			
 			Address address = registryInfo.getAddress();
 			handleOfflineNotice(address);
@@ -180,7 +182,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 		@Override
 		public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 				throws Exception {
-			logger.error("occur exception:{}",cause.getMessage());
+			logger.error("发生了异常:{}",cause.getMessage());
 			ctx.channel().close();
 		}
 		
@@ -452,7 +454,9 @@ public class BazingaMonitor extends DefaultMonitorConfig {
                 header.bodyLength(in.readInt());        // 消息体长度
                 checkpoint(State.BODY);
             case BODY:
+            	logger.info("/***************************{}******/",header.sign());
                 switch (header.sign()) {
+                
                     case PUBLISH_SERVICE:
                     case SUBSCRIBE_SERVICE:
                     case OFFLINE_NOTICE: {

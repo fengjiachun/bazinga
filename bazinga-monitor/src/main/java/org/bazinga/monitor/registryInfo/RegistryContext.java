@@ -1,15 +1,17 @@
 package org.bazinga.monitor.registryInfo;
 
-import io.netty.util.internal.ConcurrentSet;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
+
+import io.netty.util.internal.ConcurrentSet;
 
 /**
  * 
@@ -34,7 +36,34 @@ public class RegistryContext {
     	return serviceInfo.get(serviceName);
     	
     }
-
+    
+    public void removeRegistryInfo(RegistryInfo registryInfo) {
+		
+    	/************1 STEP************/
+    	Address address = registryInfo.getAddress();
+    	
+    	globalInfo.remove(address);
+    	
+    	/************2 STEP************/
+    	List<RpcService> rpcServices = registryInfo.getRpcServices();
+    	
+    	if(null != rpcServices && rpcServices.size() > 0){
+    		
+    		for(RpcService rpcService:rpcServices){
+    			String serviceName = rpcService.getServiceName();
+    			
+    			ConcurrentMap<Address, Integer> map = serviceInfo.get(serviceName);
+    			
+    			if(null != map){
+    				map.remove(address);
+    				
+    			}
+    			
+    		}
+    	}
+    	
+	}
+    
 	public void registryCurrentInfo(RegistryInfo registryInfo) {
 		
 		/************1 STEP************/
@@ -95,6 +124,6 @@ public class RegistryContext {
 	public void setComsumerInfo(ConcurrentMap<String, ArrayList<Address>> comsumerInfo) {
 		this.comsumerInfo = comsumerInfo;
 	}
-	
+
 
 }
