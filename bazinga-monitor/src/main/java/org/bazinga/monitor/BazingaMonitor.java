@@ -6,6 +6,38 @@ import static org.bazinga.common.protocol.BazingaProtocol.OFFLINE_NOTICE;
 import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
 import static org.bazinga.common.protocol.BazingaProtocol.SUBSCRIBE_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
+import org.bazinga.common.ack.AcknowledgeEncoder;
+import org.bazinga.common.exception.BazingaException;
+import org.bazinga.common.idle.IdleStateChecker;
+import org.bazinga.common.message.Acknowledge;
+import org.bazinga.common.message.Message;
+import org.bazinga.common.message.ProviderInfo;
+import org.bazinga.common.message.ProviderInfos;
+import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.message.RegistryInfo.Address;
+import org.bazinga.common.message.RegistryInfo.RpcService;
+import org.bazinga.common.message.SubScribeInfo;
+import org.bazinga.common.protocol.BazingaProtocol;
+import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
+import org.bazinga.common.utils.NamedThreadFactory;
+import org.bazinga.common.utils.NativeSupport;
+import org.bazinga.common.utils.SystemClock;
+import org.bazinga.monitor.registryInfo.RegistryContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -32,36 +64,6 @@ import io.netty.util.AttributeKey;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.ConcurrentSet;
-
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import org.bazinga.common.exception.BazingaException;
-import org.bazinga.common.idle.IdleStateChecker;
-import org.bazinga.common.message.Acknowledge;
-import org.bazinga.common.message.Message;
-import org.bazinga.common.message.ProviderInfo;
-import org.bazinga.common.message.ProviderInfos;
-import org.bazinga.common.message.RegistryInfo;
-import org.bazinga.common.message.RegistryInfo.Address;
-import org.bazinga.common.message.RegistryInfo.RpcService;
-import org.bazinga.common.message.SubScribeInfo;
-import org.bazinga.common.protocol.BazingaProtocol;
-import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
-import org.bazinga.common.utils.NamedThreadFactory;
-import org.bazinga.common.utils.NativeSupport;
-import org.bazinga.common.utils.SystemClock;
-import org.bazinga.monitor.registryInfo.RegistryContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * monitor端
@@ -91,6 +93,8 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 	protected final HashedWheelTimer timer = new HashedWheelTimer(new NamedThreadFactory("monitor.timer"));
 	
 	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
+	
+	private final AcknowledgeEncoder ackEncoder = new AcknowledgeEncoder();
 	
 	public static final int READER_IDLE_TIME_SECONDS =  60;
 	
@@ -156,6 +160,8 @@ public class BazingaMonitor extends DefaultMonitorConfig {
             }
 		}
 		
+		
+		//TODO 没有将registry中的注册消除 2016年6月19日08:57:33晚上修改~
 		@Override
 		public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 			Channel channel  = ctx.channel();
@@ -566,6 +572,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
             			new IdleStateChecker(timer, READER_IDLE_TIME_SECONDS, 0, 0),
             			idleStateTrigger
             			,messageEncoder
+            			,ackEncoder
             			,new MessageDecoder()
             			,messageHandler);
             }

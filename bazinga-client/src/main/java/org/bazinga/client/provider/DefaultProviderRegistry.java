@@ -173,6 +173,8 @@ public class DefaultProviderRegistry implements Registry {
 			logger.error("occur exception:{}", cause.getMessage());
 			ctx.channel().close();
 		}
+		
+		
 	}
 
 	public void providerRegistryInfo(RegistryInfo registryInfo) {

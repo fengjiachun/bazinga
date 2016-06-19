@@ -1,10 +1,17 @@
 package org.bazinga.client.watch;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import java.net.SocketAddress;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -12,15 +19,10 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 
-import java.net.SocketAddress;
-
-import org.bazinga.client.comsumer.AbstractCommonClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@ChannelHandler.Sharable
 public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements TimerTask, ChannelHandlerHolder {
 
-	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommonClient.class);
+	protected static final Logger logger = LoggerFactory.getLogger(ConnectionWatchdog.class);
 
 	private final Bootstrap bootstrap;
 	private final Timer timer;
@@ -56,12 +58,14 @@ public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter im
     
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    	logger.info("当前channel inactive 将关闭链接");
         boolean doReconnect = reconnect;
         if (doReconnect) {
             if (attempts < 12) {
                 attempts++;
             }
             long timeout = 2 << attempts;
+            logger.info("因为channel关闭所以讲进行重连~");
             timer.newTimeout(this, timeout, MILLISECONDS);
         }
 
@@ -74,6 +78,7 @@ public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter im
     
     public void run(Timeout timeout) throws Exception {
     	
+    	logger.info("进行重连~");
     	ChannelFuture future;
     	
     	synchronized (bootstrap) {
