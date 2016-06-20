@@ -117,8 +117,13 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress) {
 
 			public ChannelHandler[] handlers() {
-				return new ChannelHandler[] { this, new IdleStateChecker(timer, 0, WRITER_IDLE_TIME_SECONDS, 0), idleStateTrigger, messageEncoder,
-						new MessageDecoder(), consumerHandler };
+				return new ChannelHandler[] { 
+						this, 
+						new IdleStateChecker(timer, 0, WRITER_IDLE_TIME_SECONDS, 0),
+						idleStateTrigger,
+						messageEncoder,
+						new MessageDecoder(), 
+						consumerHandler };
 			}
 		};
 		watchdog.setReconnect(true);

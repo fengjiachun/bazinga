@@ -54,7 +54,7 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 /**
  * provider端代码
  */
-public class DefaultProviderRegistry implements Registry {
+public class DefaultProviderRegistry extends ServiceRegistryCenter implements Registry {
 
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultProviderRegistry.class);
 

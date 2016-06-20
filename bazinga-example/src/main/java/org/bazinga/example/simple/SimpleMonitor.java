@@ -18,8 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class SimpleMonitor {
 
-	protected static final Logger logger = LoggerFactory
-			.getLogger(DefaultConsumerRegistry.class);
+	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerRegistry.class);
 
 	private static BazingaMonitor bazingaMonitor = null;
 	
