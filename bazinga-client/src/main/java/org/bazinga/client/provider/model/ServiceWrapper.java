@@ -1,7 +1,6 @@
 package org.bazinga.client.provider.model;
 
 import java.util.List;
-import java.util.Map;
 
 public class ServiceWrapper {
 	
@@ -11,16 +10,22 @@ public class ServiceWrapper {
 	
 	private String responsiblityName;
 	
-	private transient Map<String, List<Class<?>[]>> methodsParameterTypes;
+	private String serviceName;
+	
+	private String methodName;
+	
+	private List<Class<?>[]> paramters;
 	
 	private volatile int weight = 5;
 	
-	public ServiceWrapper(Object serviceProvider,Map<String, List<Class<?>[]>> methodsParameterTypes,String appName,String responsiblityName, int weight) {
-				this.methodsParameterTypes =  methodsParameterTypes;
+	public ServiceWrapper(Object serviceProvider,String serviceName,String methodName,List<Class<?>[]> paramters,String appName,String responsiblityName, int weight) {
+				this.serviceName =  serviceName;
+				this.paramters = paramters;
 				this.serviceProvider = serviceProvider;
 				this.appName = appName;
 				this.responsiblityName = responsiblityName;
 				this.weight = weight;
+				this.methodName = methodName;
      }
 
 	public Object getServiceProvider() {
@@ -31,12 +36,21 @@ public class ServiceWrapper {
 		this.serviceProvider = serviceProvider;
 	}
 
-	public Map<String, List<Class<?>[]>> getMethodsParameterTypes() {
-		return methodsParameterTypes;
+
+	public String getServiceName() {
+		return serviceName;
 	}
 
-	public void setMethodsParameterTypes(Map<String, List<Class<?>[]>> methodsParameterTypes) {
-		this.methodsParameterTypes = methodsParameterTypes;
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+
+	public List<Class<?>[]> getParamters() {
+		return paramters;
+	}
+
+	public void setParamters(List<Class<?>[]> paramters) {
+		this.paramters = paramters;
 	}
 
 	public int getWeight() {
@@ -62,6 +76,15 @@ public class ServiceWrapper {
 	public void setResponsiblityName(String responsiblityName) {
 		this.responsiblityName = responsiblityName;
 	}
+
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+	
 	
 
 }

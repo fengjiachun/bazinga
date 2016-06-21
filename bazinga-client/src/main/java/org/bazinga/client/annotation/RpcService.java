@@ -15,9 +15,9 @@ public @interface RpcService {
 	
 	public int weight() default 5;
 	
-	public String appName() default "";
+	public String appName() default "bazinga";
 	
-	public String responsibilityName() default "";
+	public String responsibilityName() default "system";
 	
 
 }
