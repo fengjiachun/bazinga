@@ -32,7 +32,7 @@ public class SimpleMonitor {
 			port = 8080;
 		}
 		bazingaMonitor = new BazingaMonitor(port);
-		Thread thread = new Thread(new MonitorScanner());
+		Thread thread = new Thread(new MonitorScanner(),"monitor.console.scanner");
 		thread.start();
 		bazingaMonitor.start();
 		
@@ -78,7 +78,7 @@ public class SimpleMonitor {
 					ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceMaps = registryContext.getServiceInfo();
 					
 					if(serviceMaps.keySet().isEmpty()){
-						logger.info("当前时间 {}没有任何服务",simpleDateFormat.format(new Date()));
+						logger.info("当前时间 {} 没有任何服务",simpleDateFormat.format(new Date()));
 					}else{
 						Set<Entry<String, ConcurrentMap<Address, Integer>>> entries = serviceMaps.entrySet();
 						for(Entry<String, ConcurrentMap<Address, Integer>> entry : entries){

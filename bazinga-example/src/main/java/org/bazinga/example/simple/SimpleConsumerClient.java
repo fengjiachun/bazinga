@@ -23,12 +23,14 @@ public class SimpleConsumerClient {
 		}
 		SubScribeInfo info = new SubScribeInfo();
 		List<String> servicesNames = new ArrayList<String>();
-		servicesNames.add("HelloWorldService");
+		servicesNames.add("BAZINGA.NM.DEMOSERVICE.SAYHELLO");
 		info.setServiceNames(servicesNames);
 		CommonClient commonClient = new CommonClient(info);
 		commonClient.connectToRegistryServer(port, "127.0.0.1");
+		
+		Thread.sleep(3000);
 		try {
-			Object response = commonClient.call("HelloWorldService",new Object());
+			Object response = commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO","LIYUAN");
 			if(null != response){
 				if(response instanceof String){
 					System.out.println("================"+(String)response);

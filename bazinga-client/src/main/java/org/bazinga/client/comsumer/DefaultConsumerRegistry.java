@@ -36,6 +36,7 @@ import java.util.concurrent.ThreadFactory;
 import org.bazinga.client.Registry;
 import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
 import org.bazinga.client.watch.ConnectionWatchdog;
+import org.bazinga.common.ack.AcknowledgeEncoder;
 import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.exception.ConnectFailedException;
 import org.bazinga.common.idle.IdleStateChecker;
@@ -59,6 +60,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 	private MessageEncoder messageEncoder = new MessageEncoder();
 
 	private ConsumerRegistryHandler consumerHandler = new ConsumerRegistryHandler();
+	
+	private final AcknowledgeEncoder ackEncoder = new AcknowledgeEncoder();
 
 	private Bootstrap bootstrap;
 
@@ -122,6 +125,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 						new IdleStateChecker(timer, 0, WRITER_IDLE_TIME_SECONDS, 0),
 						idleStateTrigger,
 						messageEncoder,
+						ackEncoder,
 						new MessageDecoder(), 
 						consumerHandler };
 			}
@@ -263,6 +267,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
+			Channel _channel = ctx.channel();
+			
 			logger.info("comsume received some message from monitor {}", msg);
 			if (msg instanceof Message) {
 				Message message = (Message) msg;
@@ -276,6 +282,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 
 						List<ProviderInfo> list = infos.getProviders();
 						String serviceName = infos.getServiceName();
+						
+						logger.info("get service {}",serviceName);
 
 						for (ProviderInfo info : list) {
 							Channel channel = connectToProvider(info.getAddress().getPort(), info.getAddress().getHost());
@@ -285,6 +293,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 							}
 							addInfo(serviceName, channel, info.getWeight());
 						}
+						logger.info("receive monitor provider info and will send ACK");
+						_channel.writeAndFlush(new Acknowledge(message.sequence())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);;
 					}
 					break;
 				case OFFLINE_NOTICE:
@@ -293,9 +303,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 					break;
 				}
 
-			}
+			} 
 		}
-
 	}
 
 	protected abstract Channel connectToProvider(int port, String host);

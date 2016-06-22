@@ -44,8 +44,8 @@ public abstract class DefaultMonitorConfig implements AcceptorConfig {
     }
     
     protected void init(){
-    	ThreadFactory bossFactory = new DefaultThreadFactory("jupiter.acceptor.boss");
-        ThreadFactory workerFactory = new DefaultThreadFactory("jupiter.acceptor.worker");
+    	ThreadFactory bossFactory = new DefaultThreadFactory("bazinga.monitor.acceptor.boss");
+        ThreadFactory workerFactory = new DefaultThreadFactory("bazinga.monitor.acceptor.worker");
         boss = initEventLoopGroup(1, bossFactory);
         worker = initEventLoopGroup(nWorkers, workerFactory);
         bootstrap = new ServerBootstrap().group(boss, worker);

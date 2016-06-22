@@ -6,9 +6,6 @@ public class RegistryInfo {
 	
 	private Address address;
 	
-	private String appName;
-	
-	private String responsibilityUser;
 	
 	private List<RpcService> rpcServices;
 	
@@ -20,21 +17,6 @@ public class RegistryInfo {
 		this.address = address;
 	}
 
-	public String getAppName() {
-		return appName;
-	}
-
-	public void setAppName(String appName) {
-		this.appName = appName;
-	}
-
-	public String getResponsibilityUser() {
-		return responsibilityUser;
-	}
-
-	public void setResponsibilityUser(String responsibilityUser) {
-		this.responsibilityUser = responsibilityUser;
-	}
 
 	public List<RpcService> getRpcServices() {
 		return rpcServices;
@@ -47,11 +29,8 @@ public class RegistryInfo {
 
 	@Override
 	public String toString() {
-		return "RegistryInfo [address=" + address + ", appName=" + appName
-				+ ", responsibilityUser=" + responsibilityUser
-				+ ", rpcServices=" + rpcServices + "]";
+		return "RegistryInfo [address=" + address + ", rpcServices=" + rpcServices + "]";
 	}
-
 
 
 	public static class Address {
@@ -95,15 +74,43 @@ public class RegistryInfo {
 		
 		private int weight;
 		
+		private String appName;
+		
+		private String responsibilityUser;
+		
 		public RpcService() {
-			// TODO Auto-generated constructor stub
+			
 		}
 		
 		public RpcService(String serviceName, int weight) {
 			this.serviceName = serviceName;
 			this.weight = weight;
 		}
+		
 
+
+		public RpcService(String serviceName, int weight, String appName, String responsibilityUser) {
+			this.serviceName = serviceName;
+			this.weight = weight;
+			this.appName = appName;
+			this.responsibilityUser = responsibilityUser;
+		}
+
+		public String getAppName() {
+			return appName;
+		}
+
+		public void setAppName(String appName) {
+			this.appName = appName;
+		}
+
+		public String getResponsibilityUser() {
+			return responsibilityUser;
+		}
+
+		public void setResponsibilityUser(String responsibilityUser) {
+			this.responsibilityUser = responsibilityUser;
+		}
 
 		public String getServiceName() {
 			return serviceName;

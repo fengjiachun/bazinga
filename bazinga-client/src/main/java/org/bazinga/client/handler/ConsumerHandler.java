@@ -31,7 +31,7 @@ public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 				logger.warn("handler这里执行了~", msg, channel);
 				handleResponse((Response)msg,channel);
 			} catch (Exception e) {
-				logger.error("handler response occur exception",e.getMessage());
+				logger.error("handler response occur exception,{}",e.getMessage());
 				throw new RemoteException("handle response occur exception");
 			}
 			

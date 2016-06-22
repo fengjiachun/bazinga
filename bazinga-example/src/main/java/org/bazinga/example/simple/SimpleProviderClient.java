@@ -1,12 +1,12 @@
 package org.bazinga.example.simple;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bazinga.client.provider.DefaultProvider;
-import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.client.provider.ServiceRegistryCenter;
+import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.message.RegistryInfo.Address;
-import org.bazinga.common.message.RegistryInfo.RpcService;
+import org.bazinga.example.service.DemoServiceImpl;
 
 public class SimpleProviderClient {
 	
@@ -23,17 +23,9 @@ public class SimpleProviderClient {
                 // 采用默认值
             }
         }
-        RegistryInfo info = new RegistryInfo();
-        info.setAddress(new Address("127.0.0.1", 8899));
-        info.setAppName("Bazinga");
-        info.setResponsibilityUser("Lyncc");
-        RpcService rpcService1 = new RpcService("HelloWorldService",5);
-        RpcService rpcService2 = new RpcService("RpcService",5);
-        List<RpcService> rpcServices = new ArrayList<RegistryInfo.RpcService>();
-        rpcServices.add(rpcService1);
-        rpcServices.add(rpcService2);
-        info.setRpcServices(rpcServices);
-        DefaultProvider defaultProvider = new DefaultProvider(info);
+        
+        List<ServiceWrapper> serviceWrappers = new ServiceRegistryCenter().provider(new DemoServiceImpl()).create();
+        DefaultProvider defaultProvider = new DefaultProvider(new Address("127.0.0.1", 8899),serviceWrappers);
         defaultProvider.connectToRegistryServer(port, "127.0.0.1");
         defaultProvider.start();
     }

@@ -121,7 +121,7 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
                         idleStateTrigger,
                         new ConsumerDecoder(),
 						encoder,
-                       handler
+                        handler
                 };
 			}
 		};

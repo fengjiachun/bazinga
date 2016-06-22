@@ -1,17 +1,15 @@
 package org.bazinga.monitor.registryInfo;
 
+import io.netty.util.internal.ConcurrentSet;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
-
-import io.netty.util.internal.ConcurrentSet;
 
 /**
  * 

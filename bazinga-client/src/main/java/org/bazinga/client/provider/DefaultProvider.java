@@ -17,13 +17,17 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.internal.PlatformDependent;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 import org.bazinga.client.decoder.ProviderDecoder;
 import org.bazinga.client.encoder.ResponseEncoder;
 import org.bazinga.client.handler.ProviderHandler;
+import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
 import org.bazinga.common.utils.NativeSupport;
 import org.slf4j.Logger;
@@ -37,9 +41,11 @@ public class DefaultProvider extends DefaultProviderRegistry {
 	
 	private ResponseEncoder encoder = new ResponseEncoder();
 	
-	private ProviderHandler handler = new ProviderHandler();
+	private ProviderHandler handler = new ProviderHandler(this);
 	
 	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
+	
+	private final ServiceProviderContainer providerContainer = new DefaultServiceProviderContainer();
 	
 	private ServerBootstrap bootstrap;
 	
@@ -63,6 +69,37 @@ public class DefaultProvider extends DefaultProviderRegistry {
 		this.nWorkers = AVAILABLE_PROCESSORS << 1;
 		this.nativeEt = true;
 		doInit();
+	}
+	
+	public DefaultProvider(Address address,List<ServiceWrapper> serviceWrappers){
+		this(transform(address, serviceWrappers));
+		registryService(serviceWrappers);
+		
+	}
+	
+	private void registryService(List<ServiceWrapper> serviceWrappers) {
+		
+		if(null == serviceWrappers || serviceWrappers.isEmpty()){
+			return;
+		}
+		for(ServiceWrapper serviceWrapper : serviceWrappers){
+			providerContainer.registerService(serviceWrapper.getServiceName(), serviceWrapper);
+		}
+	}
+
+	public static RegistryInfo transform(Address address,List<ServiceWrapper> serviceWrappers){
+		if(null == serviceWrappers || serviceWrappers.isEmpty()){
+			return null;
+		}
+		RegistryInfo registryInfo = new RegistryInfo();
+		registryInfo.setAddress(address);
+		List<org.bazinga.common.message.RegistryInfo.RpcService> rpcSerivces = new ArrayList<org.bazinga.common.message.RegistryInfo.RpcService>();
+		for(ServiceWrapper serviceWrapper :serviceWrappers){
+			org.bazinga.common.message.RegistryInfo.RpcService rpcService = new org.bazinga.common.message.RegistryInfo.RpcService(serviceWrapper.getServiceName(),serviceWrapper.getWeight(),serviceWrapper.getAppName(),serviceWrapper.getResponsiblityName());
+			rpcSerivces.add(rpcService);
+		}
+		registryInfo.setRpcServices(rpcSerivces);
+		return registryInfo;
 	}
 	
 	private void doInit() {
@@ -136,8 +173,9 @@ public class DefaultProvider extends DefaultProviderRegistry {
         });
         return boot.bind(inetSocketAddress);
 	}
-	
-	
-	
+
+	public ServiceProviderContainer getProviderContainer() {
+		return providerContainer;
+	}
 
 }

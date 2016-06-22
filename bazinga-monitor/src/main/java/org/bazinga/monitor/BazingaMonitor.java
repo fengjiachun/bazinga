@@ -528,7 +528,8 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 							
 							
 							if (mna.channel.isActive()) {
-								 logger.warn("message {} send failed",mna);
+								logger.warn("有信息超时");
+								logger.warn("message {} send failed",mna);
                                 MessageNonAck msgNonAck = new MessageNonAck(mna.serviceName, mna.msg, mna.channel);
                                 messagesNonAck.put(msgNonAck.id, msgNonAck);
                                 mna.channel.writeAndFlush(mna.msg)

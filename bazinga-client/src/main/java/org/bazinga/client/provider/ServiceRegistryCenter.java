@@ -12,9 +12,7 @@ import io.netty.util.internal.StringUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.bytebuddy.ByteBuddy;
 
@@ -55,13 +53,13 @@ public class ServiceRegistryCenter implements RegistryCenterFactory {
         return this;
 	}
 	
+	
 	public List<ServiceWrapper> create() {
 		
 		List<ServiceWrapper> serviceWrappers = new ArrayList<ServiceWrapper>();
 		
 		RpcService rpcService = null;
 		
-		Map<String, List<Class<?>[]>> methodsParameterTypes = new HashMap<String, List<Class<?>[]>>();
 		for (Class<?> cls = serviceProvider.getClass(); cls != Object.class; cls = cls.getSuperclass()) {
 			Method[] methods = cls.getMethods();
 			if(null != methods && methods.length > 0){
@@ -71,31 +69,23 @@ public class ServiceRegistryCenter implements RegistryCenterFactory {
 					if(null != rpcService){
 						
 						String serviceName = StringUtil.isNullOrEmpty(rpcService.serviceName())?method.getName():rpcService.serviceName();
-						
 						String appName = rpcService.appName();
-						
 						String responsiblityName = rpcService.responsibilityName();
-						
 						Integer weight = rpcService.weight();
 						
 						String methodName = method.getName();
-						
 						Class<?>[] classes = method.getParameterTypes();
-						
 						List<Class<?>[]> paramters = new ArrayList<Class<?>[]>();
-						
 						paramters.add(classes);
 						
-//						ServiceWrapper serviceWrapper = new ServiceWrapper(serviceProvider,serviceName,methodName,paramters,appName,);
+						ServiceWrapper serviceWrapper = new ServiceWrapper(serviceProvider,serviceName,methodName,paramters,appName,responsiblityName,weight);
 						
-						
-						
+						serviceWrappers.add(serviceWrapper);
 					}
 				}
 			}
-			
 		}
-		return null;
+		return serviceWrappers;
 	}
 
 	

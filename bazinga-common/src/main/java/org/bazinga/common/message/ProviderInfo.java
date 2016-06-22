@@ -9,7 +9,6 @@ public class ProviderInfo {
 	private Integer weight;
 	
 	public ProviderInfo() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	
