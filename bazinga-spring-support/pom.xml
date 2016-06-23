@@ -8,27 +8,18 @@
 		<artifactId>bazinga</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>bazinga-monitor</artifactId>
-	<name>bazinga-monitor</name>
+	<artifactId>bazinga-spring-support</artifactId>
+	<name>bazinga-spring-support</name>
 	<url>http://maven.apache.org</url>
-
-
+	
 	<dependencies>
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>bazinga-common</artifactId>
+			<artifactId>bazinga-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
 		</dependency>
 	</dependencies>
 </project>

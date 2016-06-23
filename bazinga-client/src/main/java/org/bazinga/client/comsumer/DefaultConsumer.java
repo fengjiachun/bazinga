@@ -72,7 +72,7 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 	
 	
 	private void init() {
-		ThreadFactory workerFactory = new DefaultThreadFactory("jupiter.connector");
+		ThreadFactory workerFactory = new DefaultThreadFactory("bazinga.connector");
         worker = initEventLoopGroup(nWorkers, workerFactory);
         
         bootstrap = new Bootstrap().group(worker);

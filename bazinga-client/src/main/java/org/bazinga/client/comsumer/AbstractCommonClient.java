@@ -6,11 +6,12 @@ import io.netty.util.internal.ConcurrentSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.bazinga.client.loadbalance.RandomLoadBalance;
 import org.bazinga.common.message.WeightChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractCommonClient {
+public abstract class AbstractCommonClient extends RandomLoadBalance {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommonClient.class);
 

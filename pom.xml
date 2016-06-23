@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.shine.yuan</groupId>
+	<groupId>com.shine</groupId>
 	<artifactId>bazinga</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
@@ -11,7 +10,9 @@
 		<module>bazinga-client</module>
 		<module>bazinga-monitor</module>
 		<module>bazinga-example</module>
-	</modules>
+	    <module>bazinga-webapp</module>
+	    <module>bazinga-spring-support</module>
+  </modules>
 
 	<properties>
 		<netty.version>4.1.0.Final</netty.version>
@@ -20,6 +21,7 @@
 		<objenesis.version>2.1</objenesis.version>
 		<bytebuddy.version>1.2.3</bytebuddy.version>
 		<cglib.version>3.1</cglib.version>
+		<spring-framework.version>4.3.0.RELEASE</spring-framework.version>
 	</properties>
 
 	<dependencyManagement>
@@ -42,6 +44,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>bazinga-example</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>bazinga-spring-support</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -83,6 +90,11 @@
                 <groupId>cglib</groupId>
                 <artifactId>cglib</artifactId>
                 <version>${cglib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring-framework.version}</version>
             </dependency>
 		</dependencies>
 	</dependencyManagement>
