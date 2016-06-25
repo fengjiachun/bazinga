@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
-import org.bazinga.client.comsumer.DefaultConsumerRegistry;
 import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
 import org.bazinga.monitor.BazingaMonitor;
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class SimpleMonitor {
 
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerRegistry.class);
+	protected static final Logger logger = LoggerFactory.getLogger(SimpleMonitor.class);
 
 	private static BazingaMonitor bazingaMonitor = null;
 	

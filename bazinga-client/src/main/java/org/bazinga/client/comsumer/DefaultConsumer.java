@@ -69,8 +69,6 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 		init();
 	}
 	
-	
-	
 	private void init() {
 		ThreadFactory workerFactory = new DefaultThreadFactory("bazinga.connector");
         worker = initEventLoopGroup(nWorkers, workerFactory);

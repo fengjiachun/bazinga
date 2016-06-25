@@ -9,6 +9,11 @@ import static org.bazinga.common.protocol.BazingaProtocol.RESPONSE;
 
 import org.bazinga.common.message.Response;
 
+/***
+ * 用于将@{link {@link Response}编码成byte用于网络之间的传输
+ * @author BazingaLyn
+ * @time 2016年6月25日
+ */
 @ChannelHandler.Sharable
 public class ResponseEncoder extends MessageToByteEncoder<Response> {
 	

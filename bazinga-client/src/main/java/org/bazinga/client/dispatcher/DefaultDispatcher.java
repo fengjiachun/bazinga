@@ -13,10 +13,10 @@ public class DefaultDispatcher {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultDispatcher.class);
 	
-	public DefaultResultGather dispatcher(Channel channel,Request request){
+	public DefaultResultGather dispatcher(Channel channel,Request request,long timeout){
 		//TODO 每个方法特殊的超时时间没有设置
 		final Channel _channel = channel;
-		DefaultResultGather defaultResultGather = new DefaultResultGather(channel, request);
+		DefaultResultGather defaultResultGather = new DefaultResultGather(channel, request,timeout);
 		logger.info("ready send request {} to provider",request);
 		_channel.writeAndFlush(request).addListener(new ChannelFutureListener() {  
             public void operationComplete(ChannelFuture future) throws Exception {  

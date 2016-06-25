@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 import org.bazinga.client.Registry;
+import org.bazinga.client.preheater.ConectionPreHeater;
 import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
 import org.bazinga.client.watch.ConnectionWatchdog;
 import org.bazinga.common.ack.AcknowledgeEncoder;
@@ -51,10 +52,17 @@ import org.bazinga.common.utils.NativeSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 消费端向monitor端注册所需的服务
+ * @author BazingaLyn
+ *
+ * @time
+ */
 public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements Registry {
 
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerRegistry.class);
-
+	
+	/****订阅的服务名*****/
 	private SubScribeInfo info;
 
 	private MessageEncoder messageEncoder = new MessageEncoder();
@@ -66,6 +74,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 	private Bootstrap bootstrap;
 
 	private EventLoopGroup worker;
+	
 	private int nWorkers;
 
 	private final boolean nativeEt;
@@ -112,6 +121,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 	}
 
 	public void connectToRegistryServer(int port, String host) throws Exception {
+		
 
 		final Bootstrap boot = bootstrap();
 
@@ -293,6 +303,9 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 							}
 							addInfo(serviceName, channel, info.getWeight());
 						}
+						
+						ConectionPreHeater.finishPreConnection(serviceName);
+						
 						logger.info("receive monitor provider info and will send ACK");
 						_channel.writeAndFlush(new Acknowledge(message.sequence())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);;
 					}

@@ -33,12 +33,21 @@ import org.bazinga.common.utils.NativeSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 服务的提供者，从Netty的server/client角度上来说
+ * 此类是server 用来处理消费者发送的服务请求
+ * @author BazingaLyn
+ *
+ * @time
+ */
 public class DefaultProvider extends DefaultProviderRegistry {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultProvider.class);
 	
+	/***在哪个端口上提供服务，这个端口号需要发送给monitor,这样monitor才会把该信息发送给client****/
 	private int providerPort;
 	
+	/*****响应的编码器*****/
 	private ResponseEncoder encoder = new ResponseEncoder();
 	
 	private ProviderHandler handler = new ProviderHandler(this);

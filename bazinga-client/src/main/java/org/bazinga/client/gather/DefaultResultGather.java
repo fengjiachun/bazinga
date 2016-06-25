@@ -65,7 +65,7 @@ public class DefaultResultGather {
     
     public static boolean received(Channel channel, Response response) {
     	
-    	logger.warn("这里执行了~", response, channel);
+    	logger.warn("get response {} from remote termination and channel{}", response, channel);
     	
     	long invokeId = response.id();
     	DefaultResultGather defaultResultGather = resultsGathers.remove(invokeId);
@@ -164,10 +164,10 @@ public class DefaultResultGather {
 		
 	}
 	
-//	static {
-//        Thread t = new Thread(new TimeoutScanner(), "timeout.scanner");
-//        t.setDaemon(true);
-//        t.start();
-//    }
+	static {
+        Thread t = new Thread(new TimeoutScanner(), "timeout.scanner");
+        t.setDaemon(true);
+        t.start();
+    }
 
 }

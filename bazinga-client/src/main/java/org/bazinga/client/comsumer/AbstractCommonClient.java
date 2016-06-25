@@ -11,24 +11,38 @@ import org.bazinga.common.message.WeightChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 该类主要维护了某个服务的channel
+ * @author BazingaLyn
+ *
+ * @time
+ */
 public abstract class AbstractCommonClient extends RandomLoadBalance {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommonClient.class);
 
+	/****维护每个服务对应的channel*****/
 	private volatile ConcurrentMap<String, ConcurrentSet<WeightChannel>> serviceChannel = new ConcurrentHashMap<String, ConcurrentSet<WeightChannel>>();
 
+	/**
+	 * 增加某个服务到已有的Map中
+	 * @param serviceName
+	 * @param channel
+	 * @param weight
+	 */
 	public void addInfo(String serviceName, Channel channel, int weight) {
 		
 		logger.info("{} 服务 建立好的连接 {}",serviceName,channel);
 		
+		//获取该服务现有的channels
 		ConcurrentSet<WeightChannel> concurrentSet = serviceChannel.get(serviceName);
-		
+		//目前没有，则新建
 		if(null == concurrentSet) {
 			concurrentSet = new ConcurrentSet<WeightChannel>();
 		}
-		
+		//创建一个channel
 		WeightChannel newWeightChannel = new WeightChannel(weight,channel);
-		
+		//防止在value集合中
 		concurrentSet.add(newWeightChannel);
 		
 		serviceChannel.put(serviceName, concurrentSet);
