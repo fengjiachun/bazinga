@@ -66,9 +66,10 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.ConcurrentSet;
 
 /**
- * monitor端
- * @author Lyncc
+ * 注册端
+ * @author BazingaLyncc
  *
+ * @time
  */
 public class BazingaMonitor extends DefaultMonitorConfig {
 	
