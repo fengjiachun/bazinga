@@ -1,4 +1,4 @@
-package org.bazinga.client.processor;
+package org.bazinga.client.processor.provider;
 
 import io.netty.channel.Channel;
 

@@ -5,6 +5,7 @@ import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import java.rmi.RemoteException;
 
 import org.bazinga.client.gather.DefaultResultGather;
+import org.bazinga.client.processor.consumer.DefaultConsumerProcessor;
 import org.bazinga.common.message.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +23,21 @@ public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(ConsumerHandler.class);
 	
+	private final DefaultConsumerProcessor processor;
+	
+	public ConsumerHandler(DefaultConsumerProcessor defaultConsumerProcessor) {
+		this.processor = defaultConsumerProcessor;
+	}
+
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		Channel channel  = ctx.channel();
 		
 		if(msg instanceof Response){
 			try {
-				logger.warn("handler这里执行了~", msg, channel);
-				handleResponse((Response)msg,channel);
+				
+				logger.warn("receive response from channel {} and msg is {}", channel,msg);
+				processor.handleResponse(channel,(Response)msg);
 			} catch (Exception e) {
 				logger.error("handler response occur exception,{}",e.getMessage());
 				throw new RemoteException("handle response occur exception");
@@ -37,16 +45,10 @@ public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 			
 		}else{
 			logger.warn("accpet object is not response type");
+			ReferenceCountUtil.release(msg);
 		}
-		ReferenceCountUtil.release(msg);
 	}
 
-	private void handleResponse(Response response, Channel channel) {
-		response.result(serializerImpl().readObject(response.bytes(), ResultMessageWrapper.class));
-		response.bytes(null);
-		DefaultResultGather.received(channel, response);
-	}
-	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception {

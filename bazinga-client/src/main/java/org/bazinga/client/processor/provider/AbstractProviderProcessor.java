@@ -1,4 +1,4 @@
-package org.bazinga.client.processor;
+package org.bazinga.client.processor.provider;
 
 import static org.bazinga.common.message.Status.SERVER_ERROR;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;

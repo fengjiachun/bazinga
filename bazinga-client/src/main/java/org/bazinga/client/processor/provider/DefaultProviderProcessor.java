@@ -1,4 +1,4 @@
-package org.bazinga.client.processor;
+package org.bazinga.client.processor.provider;
 
 import io.netty.channel.Channel;
 
@@ -6,7 +6,7 @@ import java.util.concurrent.Executor;
 
 import org.bazinga.client.executor.ExecutorFactory;
 import org.bazinga.client.executor.ProviderExecutorFactory;
-import org.bazinga.client.processor.task.MessageTask;
+import org.bazinga.client.processor.provider.task.MessageTask;
 import org.bazinga.client.provider.DefaultProvider;
 import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.message.Request;

@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadFactory;
 import org.bazinga.client.decoder.ProviderDecoder;
 import org.bazinga.client.encoder.ResponseEncoder;
 import org.bazinga.client.handler.ProviderHandler;
-import org.bazinga.client.processor.DefaultProviderProcessor;
+import org.bazinga.client.processor.provider.DefaultProviderProcessor;
 import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.message.RegistryInfo;

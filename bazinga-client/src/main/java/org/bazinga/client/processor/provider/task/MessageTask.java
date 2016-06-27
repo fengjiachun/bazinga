@@ -1,4 +1,4 @@
-package org.bazinga.client.processor.task;
+package org.bazinga.client.processor.provider.task;
 
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import static org.bazinga.common.utils.Reflects.fastInvoke;
@@ -9,7 +9,7 @@ import io.netty.channel.ChannelFutureListener;
 
 import java.util.List;
 
-import org.bazinga.client.processor.DefaultProviderProcessor;
+import org.bazinga.client.processor.provider.DefaultProviderProcessor;
 import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.message.RequestMessageWrapper;

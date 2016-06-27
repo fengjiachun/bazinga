@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
-import org.bazinga.client.processor.DefaultProviderProcessor;
+import org.bazinga.client.processor.provider.DefaultProviderProcessor;
 import org.bazinga.common.message.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

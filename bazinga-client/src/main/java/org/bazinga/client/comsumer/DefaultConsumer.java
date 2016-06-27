@@ -23,6 +23,7 @@ import java.util.concurrent.ThreadFactory;
 import org.bazinga.client.decoder.ConsumerDecoder;
 import org.bazinga.client.encoder.RequestEncoder;
 import org.bazinga.client.handler.ConsumerHandler;
+import org.bazinga.client.processor.consumer.DefaultConsumerProcessor;
 import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
 import org.bazinga.client.watch.ConnectionWatchdog;
 import org.bazinga.common.exception.ConnectFailedException;
@@ -43,7 +44,7 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumer.class);
 	
 	private RequestEncoder encoder = new RequestEncoder();
-	private ConsumerHandler handler = new ConsumerHandler();
+	private ConsumerHandler handler = new ConsumerHandler(new DefaultConsumerProcessor());
 	
 	protected final HashedWheelTimer timer = new HashedWheelTimer(new NamedThreadFactory("consumer.timer"));
 	
