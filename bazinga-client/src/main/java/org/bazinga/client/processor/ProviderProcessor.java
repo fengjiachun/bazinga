@@ -10,7 +10,7 @@ import org.bazinga.common.message.Request;
  *
  * @time 2016年6月25日
  */
-public interface ProviderProcessor {
+public interface ProviderProcessor extends LookupService {
 
 	
 	/**

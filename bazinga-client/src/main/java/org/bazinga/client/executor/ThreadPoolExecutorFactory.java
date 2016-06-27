@@ -24,7 +24,6 @@ public class ThreadPoolExecutorFactory implements ExecutorFactory {
 		
 		workQueue = new ArrayBlockingQueue<Runnable>(32768);
 		
-		
 		 return new ThreadPoolExecutor(
                 parallelism,
                 512,

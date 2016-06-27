@@ -13,6 +13,5 @@ public interface RegistryCenterFactory {
 	RegistryCenterFactory provider(ProviderProxyHandler proxyHandler,Object serviceProvider);
 	
 	List<ServiceWrapper> create();
-	 
 
 }

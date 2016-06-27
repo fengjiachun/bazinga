@@ -2,18 +2,31 @@ package org.bazinga.client.provider.model;
 
 import java.util.List;
 
+/**
+ * 提供者每个服务抽象出来的服务编织类
+ * 根据这个类可以用来对原生的类的调用
+ * @author BazingaLyn
+ *
+ * @time
+ */
 public class ServiceWrapper {
 	
+	/****原生类****/
 	private Object serviceProvider;
 	
+	/******提供该服务的系统名*****/
 	private String appName;
 	
+	/******该系统的负责人*******/
 	private String responsiblityName;
 	
+	/******服务名*****/
 	private String serviceName;
 	
+	/*******该类中的方法名*******/
 	private String methodName;
 	
+	/******该方法的入参******/
 	private List<Class<?>[]> paramters;
 	
 	private volatile int weight = 5;

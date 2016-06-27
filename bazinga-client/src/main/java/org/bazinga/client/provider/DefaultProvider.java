@@ -24,6 +24,7 @@ import java.util.concurrent.ThreadFactory;
 import org.bazinga.client.decoder.ProviderDecoder;
 import org.bazinga.client.encoder.ResponseEncoder;
 import org.bazinga.client.handler.ProviderHandler;
+import org.bazinga.client.processor.DefaultProviderProcessor;
 import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.message.RegistryInfo;
@@ -50,7 +51,7 @@ public class DefaultProvider extends DefaultProviderRegistry {
 	/*****响应的编码器*****/
 	private ResponseEncoder encoder = new ResponseEncoder();
 	
-	private ProviderHandler handler = new ProviderHandler(this);
+	private ProviderHandler handler = new ProviderHandler(new DefaultProviderProcessor(this));
 	
 	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
 	

@@ -1,40 +1,35 @@
 package org.bazinga.client.handler;
 
-import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
-import static org.bazinga.common.utils.Reflects.findMatchingParameterTypes;
-import static org.bazinga.common.utils.Reflects.fastInvoke;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
-import java.util.List;
-
-import org.bazinga.client.provider.DefaultProvider;
-import org.bazinga.client.provider.model.ServiceWrapper;
+import org.bazinga.client.processor.DefaultProviderProcessor;
 import org.bazinga.common.message.Request;
-import org.bazinga.common.message.RequestMessageWrapper;
-import org.bazinga.common.message.Response;
-import org.bazinga.common.message.ResultMessageWrapper;
-import org.bazinga.common.message.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * 
+ * 提供者获取到消费者端的请求是的netty的hanndler
+ * 注意这边的需要新开一个线程来处理这里的请求
+ * @author BazingaLyn
+ *
+ * @time 2016年6月27日
+ */
 @ChannelHandler.Sharable
 public class ProviderHandler extends ChannelInboundHandlerAdapter {
 
-	protected static final Logger logger = LoggerFactory
-			.getLogger(ProviderHandler.class);
+	protected static final Logger logger = LoggerFactory.getLogger(ProviderHandler.class);
 
 
-	private DefaultProvider defaultProvider;
+	private DefaultProviderProcessor provider;
 	
-	public ProviderHandler(DefaultProvider defaultProvider) {
-		this.defaultProvider = defaultProvider;
+	public ProviderHandler(DefaultProviderProcessor defaultProviderProcessor) {
+		this.provider = defaultProviderProcessor;
 	}
 
 	@Override
@@ -45,56 +40,23 @@ public class ProviderHandler extends ChannelInboundHandlerAdapter {
 		logger.info("from {} received msg {}", channel.remoteAddress(), msg);
 
 		if (msg instanceof Request) {
+			
 			final Request request = (Request) msg;
+			try {
+				provider.handleRequest(channel, request);
+            } catch (Throwable t) {
+            	provider.handleException(channel, request, t);
+            }
 			
-			RequestMessageWrapper messageWrapper = null;
 			
-			byte[] bytes = request.bytes();
 			
-			messageWrapper = serializerImpl().readObject(bytes, RequestMessageWrapper.class);
+		}else{
 			
-			request.setMessageWrapper(messageWrapper);
+			logger.warn("accept error msg :{}",msg.getClass());
 			
-			String serviceName = request.getMessageWrapper().getServiceName();
-			
-			logger.info("request service name is {}",serviceName);
-			
-			Object invokeResult = null;
-			
-			ServiceWrapper serviceWrapper = defaultProvider.getProviderContainer().lookupService(serviceName);
-			String methodName = serviceWrapper.getMethodName();
-			List<Class<?>[]> parameterTypesList = serviceWrapper.getParamters();
-			Object provider = serviceWrapper.getServiceProvider();
-			
-			//请求端传递过来的方法参数
-			Object[] args = request.getMessageWrapper().getArgs();
-			
-			Class<?>[] parameterTypes = findMatchingParameterTypes(parameterTypesList, args);
-			
-			invokeResult = fastInvoke(provider, methodName, parameterTypes, args);
-			
-
-			ResultMessageWrapper requestMessageWrapper = new ResultMessageWrapper();
-
-			requestMessageWrapper.setResult(invokeResult);
-			byte[] results = serializerImpl().writeObject(requestMessageWrapper);
-			final Response response = Response.newInstance(request.invokeId(),
-					Status.OK, results);
-
-			channel.writeAndFlush(response).addListener(new ChannelFutureListener() {
-
-				public void operationComplete(ChannelFuture future) throws Exception {
-					if(future.isSuccess()){
-						logger.info("request {} get success response {}",request,response);
-					}else{
-						logger.info("request {} get failed response {}",request,response);
-					}
-				}
-			});
-
+			ReferenceCountUtil.release(msg);
 		}
 
-		ReferenceCountUtil.release(msg);
 	}
 	
 	@Override

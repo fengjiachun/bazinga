@@ -7,6 +7,13 @@ import org.bazinga.client.provider.model.ServiceWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 提供者的服务注册容器
+ * 每一个服务都有唯一的key来代表这个服务
+ * @author BazingaLyn
+ *
+ * @time 2016年6月27日
+ */
 public class DefaultServiceProviderContainer implements ServiceProviderContainer {
 	
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultServiceProviderContainer.class);
@@ -16,7 +23,6 @@ public class DefaultServiceProviderContainer implements ServiceProviderContainer
 	public void registerService(String uniqueKey, ServiceWrapper serviceWrapper) {
 		
 		serviceProviders.put(uniqueKey, serviceWrapper);
-		
 		
 	}
 
