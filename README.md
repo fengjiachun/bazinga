@@ -6,6 +6,21 @@
 
 知识点总结：
 
+1）netty知识点
+
+
+
+2）promise设计模式
+
+
+
+3）metrics性能测试工具
+
+
+
+
+
+
 
 自测时遇到的坑或者bug
 
@@ -13,3 +28,5 @@
 
 
 原因：序列化传入的对象是A,反序列化要求转换的java对象是B,A序列化的bytes无法匹配B,protostuff中的ProtostuffIOUtil.mergeFrom(bytes, message, schema)方法报错
+
+
