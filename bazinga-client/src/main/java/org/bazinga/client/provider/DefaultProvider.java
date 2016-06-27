@@ -113,8 +113,8 @@ public class DefaultProvider extends DefaultProviderRegistry {
 	}
 	
 	private void doInit() {
-		ThreadFactory bossFactory = new DefaultThreadFactory("jupiter.acceptor.boss");
-        ThreadFactory workerFactory = new DefaultThreadFactory("jupiter.acceptor.worker");
+		ThreadFactory bossFactory = new DefaultThreadFactory("bazinga.acceptor.boss");
+        ThreadFactory workerFactory = new DefaultThreadFactory("bazinga.acceptor.worker");
         boss = initEventLoopGroup(1, bossFactory);
         worker = initEventLoopGroup(nWorkers, workerFactory);
         bootstrap = new ServerBootstrap().group(boss, worker);

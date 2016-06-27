@@ -24,7 +24,7 @@ public class Request extends BytesHolder {
 		return invokeId;
 	}
 
-	public long getTimestamp() {
+	public long timestamp() {
 		return timestamp;
 	}
 
