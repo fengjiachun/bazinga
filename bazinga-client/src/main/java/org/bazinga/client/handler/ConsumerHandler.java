@@ -30,8 +30,6 @@ public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 		
 		if(msg instanceof Response){
 			try {
-				
-				logger.warn("receive response from channel {} and msg is {}", channel,msg);
 				processor.handleResponse(channel,(Response)msg);
 			} catch (Exception e) {
 				logger.error("handler response occur exception,{}",e.getMessage());

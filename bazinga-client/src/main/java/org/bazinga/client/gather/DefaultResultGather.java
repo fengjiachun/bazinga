@@ -64,8 +64,6 @@ public class DefaultResultGather {
     
     public static boolean received(Channel channel, Response response) {
     	
-    	logger.warn("get response {} from remote termination and channel{}", response, channel);
-    	
     	long invokeId = response.id();
     	DefaultResultGather defaultResultGather = resultsGathers.remove(invokeId);
     	

@@ -17,7 +17,6 @@ public class DefaultDispatcher {
 		//TODO 每个方法特殊的超时时间没有设置
 		final Channel _channel = channel;
 		DefaultResultGather defaultResultGather = new DefaultResultGather(channel, request,timeout);
-		logger.info("ready send request {} to provider",request);
 		_channel.writeAndFlush(request).addListener(new ChannelFutureListener() {  
             public void operationComplete(ChannelFuture future) throws Exception {  
                 if(!future.isSuccess()) {  
@@ -26,8 +25,6 @@ public class DefaultDispatcher {
                   
             }  
         });
-		
-		logger.info("over send");
 		return defaultResultGather;
 		
 	}

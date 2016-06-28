@@ -6,6 +6,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.bazinga.client.common.utils.CommonClient;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.SubScribeInfo;
 
 /**
@@ -16,10 +18,16 @@ import org.bazinga.common.message.SubScribeInfo;
  * 
  * 第二次：优化日记配置
  * count=128000 反而变得更慢 (＞﹏＜)
- *Request count: 128000, time: 103 second, qps: 1242
+ * Request count: 128000, time: 103 second, qps: 1242
+ * 
+ * 第三次：引入lockback日记处理，去掉业务过程中多于的logger info级别的信息
+ * 2016-06-28 18:09:03.789 INFO  [main] [BenchmarkClient] - count=128000
+ * 2016-06-28 18:09:03.789 INFO  [main] [BenchmarkClient] - Request count: 128000, time: 5 second, qps: 25600
  * 
  */
 public class BenchmarkClient {
+	
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(BenchmarkClient.class);
 
 	public static void main(String[] args) throws Exception {
 
@@ -44,7 +52,7 @@ public class BenchmarkClient {
 			Object response = commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "LIYUAN");
 			if (null != response) {
 				if (response instanceof String) {
-					System.out.println("================" + (String) response);
+					logger.info("================" + (String) response);
 				}
 			}
 		} catch (Throwable e) {
@@ -67,7 +75,7 @@ public class BenchmarkClient {
                         	Object response = commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "LIYUAN"+i);
 
                             if (count.getAndIncrement() % 500 == 0) {
-                                System.out.println("count=" + count.get());
+                                logger.info("count=" + count.get());
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -81,12 +89,12 @@ public class BenchmarkClient {
         }
         try {
             latch.await();
-            System.out.println("count=" + count.get());
+            logger.info("count=" + count.get());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         long second = (System.currentTimeMillis() - start) / 1000;
-        System.out.println("Request count: " + count.get() + ", time: " + second + " second, qps: " + count.get() / second);
+        logger.info("Request count: " + count.get() + ", time: " + second + " second, qps: " + count.get() / second);
 
 	}
 

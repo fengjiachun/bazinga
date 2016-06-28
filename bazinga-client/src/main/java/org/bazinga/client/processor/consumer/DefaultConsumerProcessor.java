@@ -38,7 +38,6 @@ public class DefaultConsumerProcessor implements ConsumerProvider {
         	logger.warn("use netty thread read response");
             task.run();
         } else {
-        	logger.info("user custom thread handler response");
             executor.execute(task);
         }
 	}
