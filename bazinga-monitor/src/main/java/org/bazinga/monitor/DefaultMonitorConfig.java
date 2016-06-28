@@ -15,12 +15,12 @@ import io.netty.util.internal.PlatformDependent;
 import java.net.SocketAddress;
 import java.util.concurrent.ThreadFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 
 public abstract class DefaultMonitorConfig implements AcceptorConfig {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultMonitorConfig.class); 
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultMonitorConfig.class);
 	
 	private ServerBootstrap bootstrap;
 	protected final SocketAddress localAddress;

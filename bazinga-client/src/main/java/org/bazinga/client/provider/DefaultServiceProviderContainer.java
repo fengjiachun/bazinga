@@ -4,8 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.bazinga.client.provider.model.ServiceWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 提供者的服务注册容器
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultServiceProviderContainer implements ServiceProviderContainer {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultServiceProviderContainer.class);
 	
 	private final ConcurrentMap<String, ServiceWrapper> serviceProviders = new ConcurrentHashMap<String, ServiceWrapper>();
 

@@ -6,38 +6,6 @@ import static org.bazinga.common.protocol.BazingaProtocol.OFFLINE_NOTICE;
 import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
 import static org.bazinga.common.protocol.BazingaProtocol.SUBSCRIBE_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
-
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import org.bazinga.common.ack.AcknowledgeEncoder;
-import org.bazinga.common.exception.BazingaException;
-import org.bazinga.common.idle.IdleStateChecker;
-import org.bazinga.common.message.Acknowledge;
-import org.bazinga.common.message.Message;
-import org.bazinga.common.message.ProviderInfo;
-import org.bazinga.common.message.ProviderInfos;
-import org.bazinga.common.message.RegistryInfo;
-import org.bazinga.common.message.RegistryInfo.Address;
-import org.bazinga.common.message.RegistryInfo.RpcService;
-import org.bazinga.common.message.SubScribeInfo;
-import org.bazinga.common.protocol.BazingaProtocol;
-import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
-import org.bazinga.common.utils.NamedThreadFactory;
-import org.bazinga.common.utils.NativeSupport;
-import org.bazinga.common.utils.SystemClock;
-import org.bazinga.monitor.registryInfo.RegistryContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -65,6 +33,37 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.internal.ConcurrentSet;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
+import org.bazinga.common.ack.AcknowledgeEncoder;
+import org.bazinga.common.exception.BazingaException;
+import org.bazinga.common.idle.IdleStateChecker;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
+import org.bazinga.common.message.Acknowledge;
+import org.bazinga.common.message.Message;
+import org.bazinga.common.message.ProviderInfo;
+import org.bazinga.common.message.ProviderInfos;
+import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.message.RegistryInfo.Address;
+import org.bazinga.common.message.RegistryInfo.RpcService;
+import org.bazinga.common.message.SubScribeInfo;
+import org.bazinga.common.protocol.BazingaProtocol;
+import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
+import org.bazinga.common.utils.NamedThreadFactory;
+import org.bazinga.common.utils.NativeSupport;
+import org.bazinga.common.utils.SystemClock;
+import org.bazinga.monitor.registryInfo.RegistryContext;
+
 /**
  * 注册端
  * @author BazingaLyncc
@@ -73,7 +72,7 @@ import io.netty.util.internal.ConcurrentSet;
  */
 public class BazingaMonitor extends DefaultMonitorConfig {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(BazingaMonitor.class); 
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(BazingaMonitor.class);
 	
 	private final boolean nativeEt;
 	

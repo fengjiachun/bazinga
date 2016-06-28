@@ -9,10 +9,10 @@ import org.bazinga.client.executor.ProviderExecutorFactory;
 import org.bazinga.client.processor.provider.task.MessageTask;
 import org.bazinga.client.provider.DefaultProvider;
 import org.bazinga.client.provider.model.ServiceWrapper;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.spi.BazingaServiceLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 默认的提供端的请求处理器
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultProviderProcessor extends AbstractProviderProcessor {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultProviderProcessor.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultProviderProcessor.class);
 	
 	public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 	

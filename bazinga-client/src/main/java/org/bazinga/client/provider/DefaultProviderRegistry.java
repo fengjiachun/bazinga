@@ -1,35 +1,10 @@
 package org.bazinga.client.provider;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.bazinga.common.protocol.BazingaProtocol.ACK;
 import static org.bazinga.common.protocol.BazingaProtocol.MAGIC;
 import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
-
-import static org.bazinga.common.protocol.BazingaProtocol.ACK;
-
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadFactory;
-
-import org.bazinga.client.Registry;
-import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
-import org.bazinga.client.watch.ConnectionWatchdog;
-import org.bazinga.common.exception.BazingaException;
-import org.bazinga.common.exception.ConnectFailedException;
-import org.bazinga.common.idle.IdleStateChecker;
-import org.bazinga.common.message.Acknowledge;
-import org.bazinga.common.message.Message;
-import org.bazinga.common.message.RegistryInfo;
-import org.bazinga.common.protocol.BazingaProtocol;
-import org.bazinga.common.utils.NamedThreadFactory;
-import org.bazinga.common.utils.NativeSupport;
-import org.bazinga.common.utils.SystemClock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -51,12 +26,35 @@ import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadFactory;
+
+import org.bazinga.client.Registry;
+import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
+import org.bazinga.client.watch.ConnectionWatchdog;
+import org.bazinga.common.exception.BazingaException;
+import org.bazinga.common.exception.ConnectFailedException;
+import org.bazinga.common.idle.IdleStateChecker;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
+import org.bazinga.common.message.Acknowledge;
+import org.bazinga.common.message.Message;
+import org.bazinga.common.message.RegistryInfo;
+import org.bazinga.common.protocol.BazingaProtocol;
+import org.bazinga.common.utils.NamedThreadFactory;
+import org.bazinga.common.utils.NativeSupport;
+import org.bazinga.common.utils.SystemClock;
+
 /**
  * provider端代码
  */
 public class DefaultProviderRegistry extends ServiceRegistryCenter implements Registry {
 
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultProviderRegistry.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultProviderRegistry.class);
 
 	private MessageEncoder messageEncoder = new MessageEncoder();
 

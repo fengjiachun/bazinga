@@ -7,9 +7,9 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
 import org.bazinga.client.processor.provider.DefaultProviderProcessor;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 @ChannelHandler.Sharable
 public class ProviderHandler extends ChannelInboundHandlerAdapter {
 
-	protected static final Logger logger = LoggerFactory.getLogger(ProviderHandler.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ProviderHandler.class);
 
 
 	private DefaultProviderProcessor provider;

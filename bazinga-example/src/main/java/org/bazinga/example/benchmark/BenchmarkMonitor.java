@@ -1,4 +1,4 @@
-package org.bazinga.example.simple;
+package org.bazinga.example.benchmark;
 
 import io.netty.util.internal.ConcurrentSet;
 
@@ -15,15 +15,16 @@ import org.bazinga.common.message.RegistryInfo.RpcService;
 import org.bazinga.monitor.BazingaMonitor;
 import org.bazinga.monitor.registryInfo.RegistryContext;
 
-public class SimpleMonitor {
-
-	private static final InternalLogger logger = InternalLoggerFactory.getInstance(SimpleMonitor.class);
+public class BenchmarkMonitor {
+	
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(BenchmarkMonitor.class);
 
 	private static BazingaMonitor bazingaMonitor = null;
 	
 	private static final SimpleDateFormat simpleDateFormat =  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-
-	public static void main(String[] args) throws InterruptedException {
+	
+	
+	public static void main(String[] args) throws Exception {
 		int port;
 		if (args.length > 0) {
 			port = Integer.parseInt(args[0]);
@@ -34,6 +35,7 @@ public class SimpleMonitor {
 		Thread thread = new Thread(new MonitorScanner(),"monitor.console.scanner");
 		thread.start();
 		bazingaMonitor.start();
+		
 	}
 	
 	public static class MonitorScanner implements Runnable {

@@ -21,8 +21,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 
 /**
  * Provide a {@link ForkJoinPool} implementation of executor.
@@ -34,13 +34,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ForkJoinPoolExecutorFactory implements ExecutorFactory {
 
-	protected static final Logger logger = LoggerFactory.getLogger(ForkJoinPoolExecutorFactory.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ForkJoinPoolExecutorFactory.class);
 
     @Override
     public Executor newExecutor(int parallelism) {
         return new ForkJoinPool(
                 parallelism,
-                new DefaultForkJoinWorkerThreadFactory("bazinga.processor"),
+                new DefaultForkJoinWorkerThreadFactory("bazinga.forkjoin.processor"),
                 new DefaultUncaughtExceptionHandler(), true);
     }
 

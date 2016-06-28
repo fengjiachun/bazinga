@@ -20,14 +20,14 @@ import org.bazinga.client.processor.provider.exception.BadRequestException;
 import org.bazinga.client.processor.provider.exception.ServerBusyException;
 import org.bazinga.client.processor.provider.exception.ServiceNotFoundException;
 import org.bazinga.client.provider.model.ServiceWrapper;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.message.RequestMessageWrapper;
 import org.bazinga.common.message.Response;
 import org.bazinga.common.message.ResultMessageWrapper;
 import org.bazinga.common.message.Status;
 import org.bazinga.common.utils.SystemClock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
@@ -35,7 +35,7 @@ import com.codahale.metrics.Timer;
 
 public class MessageTask implements RejectedRunnable {
 
-	protected static final Logger logger = LoggerFactory.getLogger(MessageTask.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(MessageTask.class);
 
 	private DefaultProviderProcessor processor;
 

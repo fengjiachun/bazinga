@@ -18,14 +18,14 @@ import net.bytebuddy.ByteBuddy;
 
 import org.bazinga.client.annotation.RpcService;
 import org.bazinga.client.provider.model.ServiceWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 
 
 
 public class ServiceRegistryCenter implements RegistryCenterFactory {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(ServiceRegistryCenter.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ServiceRegistryCenter.class);
 	
 	//全局拦截proxy
 	private volatile ProviderProxyHandler globalProviderProxyHandler;

@@ -10,14 +10,14 @@ import io.netty.handler.codec.ReplayingDecoder;
 import java.util.List;
 
 import org.bazinga.common.exception.BazingaException;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Response;
 import org.bazinga.common.protocol.BazingaProtocol;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConsumerDecoder extends ReplayingDecoder<ConsumerDecoder.State> {
 	
-protected static final Logger logger = LoggerFactory.getLogger(ConsumerDecoder.class); 
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ConsumerDecoder.class);
 	
 	private static final int MAX_BODY_SIZE = 1024 * 1024 * 5;
 	

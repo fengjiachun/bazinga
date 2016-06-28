@@ -7,10 +7,10 @@ import java.util.concurrent.Executor;
 import org.bazinga.client.executor.ConsumerExecutorFactory;
 import org.bazinga.client.executor.ExecutorFactory;
 import org.bazinga.client.processor.consumer.task.MessageTask;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Response;
 import org.bazinga.common.spi.BazingaServiceLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 消费者端的响应处理器
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultConsumerProcessor implements ConsumerProvider {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerProcessor.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultConsumerProcessor.class);
 	
 	public static final int PROCESSOR_CORE_NUM_WORKERS = Runtime.getRuntime().availableProcessors();
 	

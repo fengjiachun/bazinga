@@ -8,6 +8,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -27,12 +28,12 @@ import org.bazinga.client.handler.ProviderHandler;
 import org.bazinga.client.processor.provider.DefaultProviderProcessor;
 import org.bazinga.client.provider.model.ServiceWrapper;
 import org.bazinga.common.idle.IdleStateChecker;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
 import org.bazinga.common.utils.NativeSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 服务的提供者，从Netty的server/client角度上来说
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultProvider extends DefaultProviderRegistry {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultProvider.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultProvider.class);
 	
 	/***在哪个端口上提供服务，这个端口号需要发送给monitor,这样monitor才会把该信息发送给client****/
 	private int providerPort;
@@ -71,6 +72,9 @@ public class DefaultProvider extends DefaultProviderRegistry {
     public static final int READER_IDLE_TIME_SECONDS =  60;
     
     protected volatile ByteBufAllocator allocator;
+    
+    private volatile int writeBufferHighWaterMark = -1;
+    private volatile int writeBufferLowWaterMark = -1;
 	
 
 	public DefaultProvider(RegistryInfo info) {
@@ -81,10 +85,15 @@ public class DefaultProvider extends DefaultProviderRegistry {
 		doInit();
 	}
 	
-	public DefaultProvider(Address address,List<ServiceWrapper> serviceWrappers){
+	public DefaultProvider(Address address,List<ServiceWrapper> serviceWrappers,int writeBufferHighWaterMark,int writeBufferLowWaterMark){
 		this(transform(address, serviceWrappers));
 		registryService(serviceWrappers);
-		
+		this.writeBufferHighWaterMark = writeBufferHighWaterMark;
+		this.writeBufferLowWaterMark = writeBufferLowWaterMark;
+	}
+	
+	public DefaultProvider(Address address,List<ServiceWrapper> serviceWrappers){
+		this(address, serviceWrappers, -1, -1);
 	}
 	
 	private void registryService(List<ServiceWrapper> serviceWrappers) {
@@ -143,6 +152,11 @@ public class DefaultProvider extends DefaultProviderRegistry {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
+        
+        if (writeBufferLowWaterMark >= 0 && writeBufferHighWaterMark > 0) {
+            WriteBufferWaterMark waterMark = new WriteBufferWaterMark(writeBufferLowWaterMark, writeBufferHighWaterMark);
+            bootstrap.childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, waterMark);
+        }
 	}
 	
 	protected EventLoopGroup initEventLoopGroup(int workers,ThreadFactory bossFactory) {

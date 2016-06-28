@@ -19,20 +19,12 @@ package org.bazinga.common.utils;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 
-/**
- * Named thread factory.
- *
- * jupiter
- * org.jupiter.common.util
- *
- * @author jiachun.fjc
- */
 public class NamedThreadFactory implements ThreadFactory {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(NamedThreadFactory.class); 
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(NamedThreadFactory.class);
 
     private static final AtomicInteger poolId = new AtomicInteger();
 

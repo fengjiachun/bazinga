@@ -28,11 +28,11 @@ import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
 import org.bazinga.client.watch.ConnectionWatchdog;
 import org.bazinga.common.exception.ConnectFailedException;
 import org.bazinga.common.idle.IdleStateChecker;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.utils.NamedThreadFactory;
 import org.bazinga.common.utils.NativeSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultConsumer extends DefaultConsumerRegistry {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumer.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultConsumer.class);
 	
 	private RequestEncoder encoder = new RequestEncoder();
 	private ConsumerHandler handler = new ConsumerHandler(new DefaultConsumerProcessor());

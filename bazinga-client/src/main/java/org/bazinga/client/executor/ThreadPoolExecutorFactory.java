@@ -10,13 +10,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.bazinga.client.processor.RejectedTaskPolicyWithReport;
 import org.bazinga.common.utils.NamedThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ThreadPoolExecutorFactory implements ExecutorFactory {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(ThreadPoolExecutorFactory.class);
-
 	@Override
 	public Executor newExecutor(int parallelism) {
 		
@@ -30,7 +26,7 @@ public class ThreadPoolExecutorFactory implements ExecutorFactory {
                 120L,
                 SECONDS,
                 workQueue,
-                new NamedThreadFactory("processor"),
+                new NamedThreadFactory("bazinga.common.processor"),
                 createRejectedPolicy());
 	}
 

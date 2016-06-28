@@ -2,14 +2,13 @@ package org.bazinga.client.processor.provider;
 
 import static org.bazinga.common.message.Status.SERVER_ERROR;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
+import io.netty.channel.Channel;
 
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.message.Response;
 import org.bazinga.common.message.ResultMessageWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.netty.channel.Channel;
 
 /**
  * 服务端当服务于处理请求时的时候，对异常的处理
@@ -19,7 +18,7 @@ import io.netty.channel.Channel;
  */
 public abstract class AbstractProviderProcessor implements ProviderProcessor {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(AbstractProviderProcessor.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractProviderProcessor.class);
 	
 	@Override
 	public void handleException(Channel channel, Request request, Throwable cause) {

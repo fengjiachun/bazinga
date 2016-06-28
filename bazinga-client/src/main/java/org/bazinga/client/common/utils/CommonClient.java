@@ -16,6 +16,8 @@ import org.bazinga.common.message.WeightChannel;
 public class CommonClient extends DefaultConsumer implements DefaultCommonClient {
 
 	private final static long DEFAULT_TIME_OUT = 5000;
+	
+	private boolean preHeatStatus = true;
 
 	public CommonClient(SubScribeInfo info) {
 		super(info);
@@ -30,8 +32,11 @@ public class CommonClient extends DefaultConsumer implements DefaultCommonClient
 	public Object call(String serviceName, long timeout, Object... args) throws Throwable {
 
 		ConectionPreHeater conectionPreHeater = new ConectionPreHeater(serviceName, timeout);
-
-		conectionPreHeater.getPreHeatReady();
+		
+         if(preHeatStatus){
+        	 conectionPreHeater.getPreHeatReady();
+        	 preHeatStatus = false;
+         }
 
 		if (null == serviceName || serviceName.length() == 0) {
 			throw new NoServiceException("调用的服务名不能为空");

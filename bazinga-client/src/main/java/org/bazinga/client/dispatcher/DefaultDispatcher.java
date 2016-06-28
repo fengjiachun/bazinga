@@ -5,13 +5,13 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
 import org.bazinga.client.gather.DefaultResultGather;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DefaultDispatcher {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultDispatcher.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultDispatcher.class);
 	
 	public DefaultResultGather dispatcher(Channel channel,Request request,long timeout){
 		//TODO 每个方法特殊的超时时间没有设置

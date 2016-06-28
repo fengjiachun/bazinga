@@ -9,12 +9,12 @@ import net.bytebuddy.implementation.bind.annotation.Origin;
 import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.SuperCall;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 
 public class ProviderProxyHandler {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(ProviderProxyHandler.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ProviderProxyHandler.class);
 	
 	private final CopyOnWriteArrayList<ProviderInterceptor> interceptors = new CopyOnWriteArrayList<ProviderInterceptor>();
 	

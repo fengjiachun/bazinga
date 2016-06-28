@@ -11,16 +11,15 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.bazinga.client.comsumer.DefaultConsumerRegistry;
 import org.bazinga.common.exception.RemoteException;
 import org.bazinga.common.exception.TimeoutException;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.message.Response;
 import org.bazinga.common.message.ResultMessageWrapper;
 import org.bazinga.common.message.Status;
 import org.bazinga.common.utils.SystemClock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultResultGather {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerRegistry.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultResultGather.class);
 	
 	private static final ConcurrentMap<Long, DefaultResultGather> resultsGathers = new ConcurrentHashMap<Long, DefaultResultGather>();
 	

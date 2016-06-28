@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.bazinga.client.loadbalance.RandomLoadBalance;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.WeightChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 该类主要维护了某个服务的channel
@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractCommonClient extends RandomLoadBalance {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(AbstractCommonClient.class);
+	
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(AbstractCommonClient.class);
 
 	/****维护每个服务对应的channel*****/
 	private volatile ConcurrentMap<String, ConcurrentSet<WeightChannel>> serviceChannel = new ConcurrentHashMap<String, ConcurrentSet<WeightChannel>>();

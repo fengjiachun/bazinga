@@ -8,13 +8,13 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.bazinga.common.exception.ConnectFailedException;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.utils.SystemClock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ConectionPreHeater {
 
-	protected static final Logger logger = LoggerFactory.getLogger(ConectionPreHeater.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ConectionPreHeater.class);
 
 	private static final ConcurrentMap<String, ConectionPreHeater> preHeaterGather = new ConcurrentHashMap<String, ConectionPreHeater>();
 

@@ -41,6 +41,8 @@ import org.bazinga.common.ack.AcknowledgeEncoder;
 import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.exception.ConnectFailedException;
 import org.bazinga.common.idle.IdleStateChecker;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
 import org.bazinga.common.message.ProviderInfo;
@@ -49,8 +51,6 @@ import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
 import org.bazinga.common.utils.NamedThreadFactory;
 import org.bazinga.common.utils.NativeSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 消费端向monitor端注册所需的服务
@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements Registry {
 
-	protected static final Logger logger = LoggerFactory.getLogger(DefaultConsumerRegistry.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultConsumerRegistry.class);
 	
 	/****订阅的服务名*****/
 	private SubScribeInfo info;

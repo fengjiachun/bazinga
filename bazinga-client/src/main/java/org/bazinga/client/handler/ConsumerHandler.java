@@ -1,27 +1,22 @@
 package org.bazinga.client.handler;
 
-import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
-
-import java.rmi.RemoteException;
-
-import org.bazinga.client.gather.DefaultResultGather;
-import org.bazinga.client.processor.consumer.DefaultConsumerProcessor;
-import org.bazinga.common.message.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 
-import org.bazinga.common.message.ResultMessageWrapper;
+import java.rmi.RemoteException;
+
+import org.bazinga.client.processor.consumer.DefaultConsumerProcessor;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
+import org.bazinga.common.message.Response;
 
 @Sharable
 public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(ConsumerHandler.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ConsumerHandler.class);
 	
 	private final DefaultConsumerProcessor processor;
 	

@@ -1,12 +1,6 @@
 package org.bazinga.client.watch;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import java.net.SocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -19,10 +13,15 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 
+import java.net.SocketAddress;
+
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
+
 @ChannelHandler.Sharable
 public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements TimerTask, ChannelHandlerHolder {
 
-	protected static final Logger logger = LoggerFactory.getLogger(ConnectionWatchdog.class);
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ConnectionWatchdog.class);
 
 	private final Bootstrap bootstrap;
 	private final Timer timer;

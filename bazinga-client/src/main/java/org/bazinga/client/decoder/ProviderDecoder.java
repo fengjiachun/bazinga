@@ -10,11 +10,11 @@ import io.netty.handler.codec.ReplayingDecoder;
 import java.util.List;
 
 import org.bazinga.common.exception.BazingaException;
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.protocol.BazingaProtocol;
 import org.bazinga.common.utils.SystemClock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ProviderDecoder extends ReplayingDecoder<ProviderDecoder.State> {
 	
-	protected static final Logger logger = LoggerFactory.getLogger(ProviderDecoder.class); 
+	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ProviderDecoder.class);
 	
 	private static final int MAX_BODY_SIZE = 1024 * 1024 * 5;
 	
