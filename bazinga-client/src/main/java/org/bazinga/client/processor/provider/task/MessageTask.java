@@ -84,8 +84,6 @@ public class MessageTask implements RejectedRunnable {
 
 		String serviceName = _request.getMessageWrapper().getServiceName();
 
-		logger.info("request service name is {}", serviceName);
-
 		Object invokeResult = null;
 
 		ServiceWrapper serviceWrapper = _processor.lookupService(serviceName);
@@ -122,7 +120,6 @@ public class MessageTask implements RejectedRunnable {
 					responseSizeHistogram.update(results.length);
 					
 					processingTimer.update(elapsed, MILLISECONDS);
-					logger.info("request {} get success response {}", request, response);
 				} else {
 					logger.info("request {} get failed response {}", request, response);
 				}

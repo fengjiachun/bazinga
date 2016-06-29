@@ -20,7 +20,11 @@ public class CommonClient extends DefaultConsumer implements DefaultCommonClient
 	private boolean preHeatStatus = true;
 
 	public CommonClient(SubScribeInfo info) {
-		super(info);
+		super(info,-1,-1);
+	}
+	
+	public CommonClient(SubScribeInfo info,int writeBufferHighWaterMark,int writeBufferLowWaterMark) {
+		super(info,writeBufferHighWaterMark,writeBufferLowWaterMark);
 	}
 
 	public Object call(String serviceName, Object... args) throws Throwable {

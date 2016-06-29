@@ -10,6 +10,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -62,12 +63,22 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
     public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
     
     public static final int WRITER_IDLE_TIME_SECONDS = 30;
+    
+    private volatile int writeBufferHighWaterMark = -1;
+    private volatile int writeBufferLowWaterMark = -1;
 
-	public DefaultConsumer(SubScribeInfo info) {
+	public DefaultConsumer(SubScribeInfo info,int writeBufferHighWaterMark,int writeBufferLowWaterMark) {
 		super(info);
 		this.nWorkers = AVAILABLE_PROCESSORS << 1;
 		this.nativeEt = true;
 		init();
+		
+		this.writeBufferHighWaterMark = writeBufferHighWaterMark;
+		this.writeBufferLowWaterMark = writeBufferLowWaterMark;
+	}
+	
+	public DefaultConsumer(SubScribeInfo info) {
+		this(info, -1, -1);
 	}
 	
 	private void init() {
@@ -91,6 +102,11 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
         .option(ChannelOption.TCP_NODELAY, true)
         .option(ChannelOption.ALLOW_HALF_CLOSURE, false);
+        
+        if (writeBufferLowWaterMark >= 0 && writeBufferHighWaterMark > 0) {
+            WriteBufferWaterMark waterMark = new WriteBufferWaterMark(writeBufferLowWaterMark, writeBufferHighWaterMark);
+            bootstrap.option(ChannelOption.WRITE_BUFFER_WATER_MARK, waterMark);
+        }
         
 	}
 

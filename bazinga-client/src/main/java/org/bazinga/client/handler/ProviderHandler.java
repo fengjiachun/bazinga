@@ -37,8 +37,6 @@ public class ProviderHandler extends ChannelInboundHandlerAdapter {
 			throws Exception {
 
 		Channel channel = ctx.channel();
-		logger.info("from {} received msg {}", channel.remoteAddress(), msg);
-
 		if (msg instanceof Request) {
 			
 			final Request request = (Request) msg;

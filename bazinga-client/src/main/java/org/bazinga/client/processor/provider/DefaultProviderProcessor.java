@@ -46,7 +46,6 @@ public class DefaultProviderProcessor extends AbstractProviderProcessor {
         	logger.warn("use netty thread handler request");
             task.run();
         } else {
-        	logger.info("user custom executor execute request");
             executor.execute(task);
         }
 	}

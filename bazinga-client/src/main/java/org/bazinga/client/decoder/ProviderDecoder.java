@@ -43,7 +43,6 @@ public class ProviderDecoder extends ReplayingDecoder<ProviderDecoder.State> {
 	@Override
 	protected void decode(ChannelHandlerContext ctx, ByteBuf in,
 			List<Object> out) throws Exception {
-		logger.info("正在为调用者的请求解码");
 		switch (state()) {
 		case HEADER_MAGIC:
 			checkMagic(in.readShort());         // MAGIC

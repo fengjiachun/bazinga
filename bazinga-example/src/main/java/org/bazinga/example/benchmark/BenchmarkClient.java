@@ -24,10 +24,18 @@ import org.bazinga.common.message.SubScribeInfo;
  * 2016-06-28 18:09:03.789 INFO  [main] [BenchmarkClient] - count=128000
  * 2016-06-28 18:09:03.789 INFO  [main] [BenchmarkClient] - Request count: 128000, time: 5 second, qps: 25600
  * 
+ * 第四次 64线程
+ * 2016-06-29 15:01:11.727 INFO  [main] [BenchmarkClient] - count=3200000
+ * 2016-06-29 15:01:11.727 INFO  [main] [BenchmarkClient] - Request count: 3200000, time: 302 second, qps: 10596
+ * 
  */
 public class BenchmarkClient {
 	
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(BenchmarkClient.class);
+	
+	private final static int WRITE_BUFFER_HIGH_WATER_MARK = 256 * 1024;
+
+	private final static int WRITE_BUFFER_LOW_WATER_MARK = 128 * 1024;
 
 	public static void main(String[] args) throws Exception {
 
@@ -45,7 +53,7 @@ public class BenchmarkClient {
 		List<String> servicesNames = new ArrayList<String>();
 		servicesNames.add("BAZINGA.NM.DEMOSERVICE.SAYHELLO");
 		info.setServiceNames(servicesNames);
-		final CommonClient commonClient = new CommonClient(info);
+		final CommonClient commonClient = new CommonClient(info,WRITE_BUFFER_HIGH_WATER_MARK,WRITE_BUFFER_LOW_WATER_MARK);
 		commonClient.connectToRegistryServer(port, "127.0.0.1");
 
 		try {
@@ -59,7 +67,7 @@ public class BenchmarkClient {
 			e.printStackTrace();
 		}
 
-		final int t = 500;
+		final int t = 10000;
 		final int step = 6;
 		long start = System.currentTimeMillis();
 		final CountDownLatch latch = new CountDownLatch(processors << step);
@@ -74,7 +82,7 @@ public class BenchmarkClient {
                         try {
                         	Object response = commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "LIYUAN"+i);
 
-                            if (count.getAndIncrement() % 500 == 0) {
+                            if (count.getAndIncrement() % 5000 == 0) {
                                 logger.info("count=" + count.get());
                             }
                         } catch (Exception e) {
