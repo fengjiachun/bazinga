@@ -74,10 +74,8 @@
  1)selector.open
  2)selector.select
  
- http://zhhphappy.iteye.com/blog/2032893
  
- 
- 
+ 关于selector的唤醒机制就是在创建的时候设定的
  
  
  
