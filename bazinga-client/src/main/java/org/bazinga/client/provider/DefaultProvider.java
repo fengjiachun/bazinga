@@ -144,7 +144,7 @@ public class DefaultProvider extends DefaultProviderRegistry {
             ((NioEventLoopGroup) worker).setIoRatio(100);
         }
         
-        bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
+        bootstrap.option(ChannelOption.SO_BACKLOG, 32768);
         bootstrap.option(ChannelOption.SO_REUSEADDR, true);
 
         // child options

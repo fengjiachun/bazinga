@@ -67,7 +67,7 @@ public class BenchmarkClient {
 			e.printStackTrace();
 		}
 
-		final int t = 10000;
+		final int t = 500000;
 		final int step = 6;
 		long start = System.currentTimeMillis();
 		final CountDownLatch latch = new CountDownLatch(processors << step);
@@ -80,9 +80,9 @@ public class BenchmarkClient {
                 public void run() {
                     for (int i = 0; i < t; i++) {
                         try {
-                        	Object response = commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "LIYUAN"+i);
+                        	Object response = commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "jupiter");
 
-                            if (count.getAndIncrement() % 5000 == 0) {
+                            if (count.getAndIncrement() % 50000 == 0) {
                                 logger.info("count=" + count.get());
                             }
                         } catch (Exception e) {

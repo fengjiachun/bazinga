@@ -32,8 +32,8 @@ public class BenchmarkMonitor {
 			port = 8080;
 		}
 		bazingaMonitor = new BazingaMonitor(port);
-		Thread thread = new Thread(new MonitorScanner(),"monitor.console.scanner");
-		thread.start();
+//		Thread thread = new Thread(new MonitorScanner(),"monitor.console.scanner");
+//		thread.start();
 		bazingaMonitor.start();
 		
 	}

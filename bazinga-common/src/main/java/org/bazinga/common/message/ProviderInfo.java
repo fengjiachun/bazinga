@@ -11,13 +11,10 @@ public class ProviderInfo {
 	public ProviderInfo() {
 	}
 	
-	
 	public ProviderInfo(Address address, Integer weight) {
 		this.address = address;
 		this.weight = weight;
 	}
-
-
 
 	public Address getAddress() {
 		return address;
