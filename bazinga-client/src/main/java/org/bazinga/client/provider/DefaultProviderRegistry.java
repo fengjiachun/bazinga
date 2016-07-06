@@ -229,6 +229,7 @@ public class DefaultProviderRegistry extends ServiceRegistryCenter implements Re
 		}
 	}
 
+	@ChannelHandler.Sharable
 	class ProviderRegistryHandler extends ChannelInboundHandlerAdapter {
 
 		@Override

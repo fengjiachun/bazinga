@@ -15,7 +15,7 @@ public class SimpleProviderClient {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        int port = 18899;
+        int port = 8080;
         if (args != null && args.length > 0) {
             try {
                 port = Integer.valueOf(args[0]);
