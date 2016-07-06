@@ -82,7 +82,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 	
 	private ChannelGroup subscribeChannels = new DefaultChannelGroup("subscribers", GlobalEventExecutor.INSTANCE);
 	
-	private RegistryContext registryContext = new RegistryContext();
+	protected RegistryContext registryContext = new RegistryContext();
 	
 	private final ConcurrentMap<String, MessageNonAck> messagesNonAck = new ConcurrentHashMap<String, MessageNonAck>();
 	
@@ -601,5 +601,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
 	}
+	
+	
 
 }

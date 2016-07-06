@@ -17,7 +17,7 @@ public class CommonRpcMonitor implements InitializingBean {
 
 	public void afterPropertiesSet() throws Exception {
 		bazingaMonitor = new BazingaMonitor(port);
-		bazingaMonitor.start();
+		bazingaMonitor.start(false);
 	}
 
 	public int getPort() {
@@ -31,6 +31,9 @@ public class CommonRpcMonitor implements InitializingBean {
 	public void setBazingaMonitor(BazingaMonitor bazingaMonitor) {
 		this.bazingaMonitor = bazingaMonitor;
 	}
-	
+
+	public BazingaMonitor getBazingaMonitor() {
+		return bazingaMonitor;
+	}
 
 }

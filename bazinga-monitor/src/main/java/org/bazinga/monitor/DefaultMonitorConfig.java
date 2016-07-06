@@ -67,13 +67,22 @@ public abstract class DefaultMonitorConfig implements AcceptorConfig {
         }
         
     }
+    
+    @Override
+    public void start() throws InterruptedException {
+    	
+    	start(true);
+    }
 	
-	public void start() throws InterruptedException {
+	public void start(boolean sync) throws InterruptedException {
 		ChannelFuture future = bind(localAddress).sync();
 		
-		logger.info("监控端即将启动~");
-		
-		 future.channel().closeFuture().sync();
+		 logger.info("监控端即将启动~");
+		 
+		 if (sync) {
+	            // Wait until the server socket is closed.
+	            future.channel().closeFuture().sync();
+	      }
 		
 	}
 	
