@@ -7,8 +7,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="${ctx}/resources/bootstrap-table.min.css">
-<script type="text/javascript" src="${ctx}/resources/jquery-1.11.1.min.js" /></script>
-<script type="text/javascript" src="${ctx}/resources/bootstrap-table.min.js"></script>
+<script type="text/javascript"
+	src="${ctx}/resources/jquery-1.11.1.min.js" /></script>
+<script type="text/javascript"
+	src="${ctx}/resources/bootstrap-table.min.js"></script>
 <link rel="stylesheet" href="${ctx}/resources/bootstrap.css">
 <script type="text/javascript" src="${ctx}/resources/bootstrap.js"></script>
 <link rel="stylesheet" href="${ctx}/resources/starter-template.css">
@@ -42,21 +44,19 @@
 
 		<div class="starter-template">
 			<div class="col-lg-6 input-group">
-               <input type="text" class="form-control">
-               <span class="input-group-btn">
-                  <button class="btn btn-default" type="button">
-                     	检索
-                  </button>
-               </span>
-            </div>
+				<input type="text" id="searchIpt" class="form-control"> <span
+					class="input-group-btn">
+					<button class="btn btn-default" id="searchBtn" type="button">检索</button>
+				</span>
+			</div>
 		</div>
-		
+
 		<div class="page-container">
-	  <div style="height:500px">
-	   <table class="table table-bordered table-striped" id="searchTable">
-	   </table>
-	   </div>
-	</div>
+			<div style="height: 500px">
+				<table class="table table-bordered table-striped" id="searchTable">
+				</table>
+			</div>
+		</div>
 
 	</div>
 
@@ -64,77 +64,71 @@
 </body>
 
 <script type="text/javascript">
-  $(function(){
-	 $("#searchTable").bootstrapTable({
-		 method:'get',
-		 url:"${ctx}/bazinga/search",
-		 cache: false, 
-		 striped: true,
-		 pagination: true,
-		 pageList: [10,20,50],
-		 pageSize:10,
-		 pageNumber:1,
-		 queryParams: function(params){
-		 		paramsReturn = {
-					limit: params.limit,
-					offset: params.offset,
-				};
-			 	return paramsReturn;
-		 },
-		 sidePagination:'server',
-		 contentType: "application/x-www-form-urlencoded",
-		 showColumns: true, 
-		 showRefresh: true,  
-		 smartDisplay:true,
-		 columns: [
-          {  
-				field: 'id',  
-				title: '编号',  
-				align: 'center',  
-				width: '60',  
-				valign: 'middle',	
-          },
-          {  
-        	  	field: 'username', 
-          	    title: '名称',  
-				align: 'center',  
-				width: '60',  
-				valign: 'middle', 
-          },
-          {  
-				field: 'age',  
-				title: '年龄',  
-				align: 'center',  
-				width: '40',  
-				valign: 'middle',
-          },
-          {   
-        	  	field: 'password',
-          		title: '密码',  
-				align: 'center',  
-				width: '120',  
-				valign: 'middle',
-          },
-          {
-        	    field: 'mail',
-				title: '邮箱',  
-				align: 'center',  
-				width: '40',  
-				valign: 'middle', 
-          },
-          {
-				title: '用户操作',  
-				align: 'center',  
-				width: '240',  
-				valign: 'middle', 
-				formatter: function(value,row,index){
-	        		 var str = "";
-	            		 str += '<button class="btn btn-secondary btn-xs"><i class="fa fa-edit"></i><span>查看</span></button>';
-	            	 return str;
-   			}
-          },
-	     ]
-	 });
-  });
+
+$(function(){
+	
+	$("#searchBtn").on("click",function(){
+		 var serviceName = $("#searchIpt").val();
+		 if(serviceName.length > 0){
+			 console.info("search");
+			 initFailHistoryBootstrapTable();
+		 }
+		
+	});
+});
+
+	function initFailHistoryBootstrapTable(){
+		 $("#searchTable").bootstrapTable({
+			 method:'get',
+			 url:"${ctx}/bazinga/search",
+			 cache: false, 
+			 striped: true,
+			 pagination: true,
+			 pageList: [10,20,50],
+			 pageSize:10,
+			 pageNumber:1,
+			 queryParams: function(params){
+				    var serviceName = $("#searchIpt").val();
+			 		paramsReturn = {
+						limit: params.limit,
+						offset: params.offset,
+						serviceName:serviceName
+					};
+				 	return paramsReturn;
+			 },
+			 sidePagination:'server',
+			 contentType: "application/x-www-form-urlencoded",
+			 showColumns: true, 
+			 smartDisplay:true,
+			 columns: [
+	          {  
+					field: 'id',  
+					title: '编号',  
+					align: 'center',  
+					width: '40',  
+					valign: 'middle',	
+	          },
+	          {  
+	        	  	field: 'name', 
+	          	    title: '服务名',  
+					align: 'center',  
+					width: '240',  
+					valign: 'middle', 
+	          },
+	          {
+					title: '用户操作',  
+					align: 'center',  
+					width: '120',  
+					valign: 'middle', 
+					formatter: function(value,row,index){
+		        		 var str = "";
+		            		 str += '<button class="btn btn-secondary btn-xs"><i class="fa fa-edit"></i><span>查看</span></button>';
+		            	 return str;
+	   			}
+	          },
+		     ]
+		 });
+	}
+	
 </script>
 </html>

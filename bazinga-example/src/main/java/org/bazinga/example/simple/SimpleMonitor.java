@@ -28,7 +28,7 @@ public class SimpleMonitor {
 		if (args.length > 0) {
 			port = Integer.parseInt(args[0]);
 		} else {
-			port = 8080;
+			port = 18899;
 		}
 		bazingaMonitor = new BazingaMonitor(port);
 		Thread thread = new Thread(new MonitorScanner(),"monitor.console.scanner");
