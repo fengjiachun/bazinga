@@ -8,11 +8,11 @@
 
 ##1) netty知识点
 
-### NIO [概念模型](http://blog.csdn.net/linuu/article/details/51836281) 
+ [NIO概念模型](http://blog.csdn.net/linuu/article/details/51836281) 
 
-### [NIO学习](http://ifeve.com/java-nio-all/)
+ [NIO学习](http://ifeve.com/java-nio-all/)
  
-### [selector源码解析](http://zhhphappy.iteye.com/blog/2032893)
+ [selector源码解析](http://zhhphappy.iteye.com/blog/2032893)
 
 
 ##2) promise设计模式
