@@ -20,38 +20,37 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("bazinga")
 public class CoreController {
-	
+
 	@Autowired
 	private CommonRpcMonitor commonRpcMonitor;
+	
+	private RegistryContext registryContext;
 
 	@RequestMapping("index")
-	public String index(){
+	public String index() {
 		return "index";
 	}
-	
+
 	@ResponseBody
 	@RequestMapping("search")
-	public Map<String, Object> search(String serviceName){
-		
+	public Map<String, Object> search(String serviceName, Integer limit, Integer offset) {
+
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		
 		List<RpcServiceVo> rpcServiceVos = new ArrayList<RpcServiceVo>();
 		
-		RegistryContext registryContext = commonRpcMonitor.getBazingaMonitor().getRegistryContext();
-		
+		registryContext = commonRpcMonitor.getBazingaMonitor().getRegistryContext();
 		ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceInfos = registryContext.getServiceInfo();
-		
+
 		Set<String> serviceNames = serviceInfos.keySet();
-		
-		if(null != serviceNames && serviceNames.size() > 0){
-			
+		if (null != serviceNames && serviceNames.size() > 0) {
+
 			int count = 0;
-			for(String eachService :serviceNames){
-				
+			for (String eachService : serviceNames) {
+
 				RpcServiceVo rpcServiceVo = new RpcServiceVo();
-				
-				if(serviceName != null && !StringUtils.isEmpty(serviceName)){
-					if(eachService.indexOf(serviceName) > -1){
+
+				if (serviceName != null && !StringUtils.isEmpty(serviceName)) {
+					if (eachService.indexOf(serviceName) > -1) {
 						rpcServiceVo.setId(count++);
 						rpcServiceVo.setName(eachService);
 						rpcServiceVos.add(rpcServiceVo);
@@ -59,9 +58,24 @@ public class CoreController {
 				}
 			}
 		}
-		
+
 		resultMap.put("total", rpcServiceVos.size());
-		resultMap.put("rows", rpcServiceVos);
+		resultMap.put("rows", page(rpcServiceVos, limit, offset));
 		return resultMap;
+	}
+
+	/**
+	 * 
+	 * @param rpcServiceVos
+	 * @param limit
+	 * @param offset
+	 * @return
+	 */
+	private List<RpcServiceVo> page(List<RpcServiceVo> rpcServiceVos, Integer limit, Integer offset) {
+
+		if (null != rpcServiceVos && !rpcServiceVos.isEmpty()) {
+			return rpcServiceVos.subList(offset, limit+offset > rpcServiceVos.size() ? (rpcServiceVos.size()):limit+offset);
+		}
+		return rpcServiceVos;
 	}
 }

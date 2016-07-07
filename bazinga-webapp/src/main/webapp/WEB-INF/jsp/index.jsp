@@ -67,11 +67,13 @@
 
 $(function(){
 	
-	$("#searchBtn").on("click",function(){
+	initFailHistoryBootstrapTable();
+	
+	$("#searchBtn").click(function(){
 		 var serviceName = $("#searchIpt").val();
 		 if(serviceName.length > 0){
 			 console.info("search");
-			 initFailHistoryBootstrapTable();
+			 $('#searchTable').bootstrapTable("refresh");
 		 }
 		
 	});
