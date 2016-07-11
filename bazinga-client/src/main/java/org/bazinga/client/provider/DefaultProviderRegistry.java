@@ -118,7 +118,7 @@ public class DefaultProviderRegistry extends ServiceRegistryCenter implements Re
 
 		final SocketAddress socketAddress = InetSocketAddress.createUnresolved(host, port);
 
-		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress) {
+		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress,null) {
 
 			public ChannelHandler[] handlers() {
 				return new ChannelHandler[] { 

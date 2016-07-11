@@ -24,9 +24,8 @@ import org.bazinga.common.message.SubScribeInfo;
  * 2016-06-28 18:09:03.789 INFO  [main] [BenchmarkClient] - count=128000
  * 2016-06-28 18:09:03.789 INFO  [main] [BenchmarkClient] - Request count: 128000, time: 5 second, qps: 25600
  * 
- * 第四次 64线程
- * 2016-06-29 15:01:11.727 INFO  [main] [BenchmarkClient] - count=3200000
- * 2016-06-29 15:01:11.727 INFO  [main] [BenchmarkClient] - Request count: 3200000, time: 302 second, qps: 10596
+ * 2016-07-11 14:23:13.728 INFO  [main] [BenchmarkClient] - count=25600000
+ * 2016-07-11 14:23:13.728 INFO  [main] [BenchmarkClient] - Request count: 25600000, time: 585 second, qps: 43760
  * 
  */
 public class BenchmarkClient {
@@ -68,7 +67,7 @@ public class BenchmarkClient {
 		}
 
 		final int t = 500000;
-		final int step = 6;
+		final int step = 5;
 		long start = System.currentTimeMillis();
 		final CountDownLatch latch = new CountDownLatch(processors << step);
 		final AtomicLong count = new AtomicLong();

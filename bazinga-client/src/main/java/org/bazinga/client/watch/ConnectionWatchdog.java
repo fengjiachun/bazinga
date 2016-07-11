@@ -15,6 +15,7 @@ import io.netty.util.TimerTask;
 
 import java.net.SocketAddress;
 
+import org.bazinga.common.group.BChannelGroup;
 import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 
@@ -26,14 +27,16 @@ public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter im
 	private final Bootstrap bootstrap;
 	private final Timer timer;
 	private final SocketAddress remoteAddress;
+	private final BChannelGroup group;
 
 	private volatile boolean reconnect = true;
 	private int attempts;
 
-	public ConnectionWatchdog(Bootstrap bootstrap, Timer timer, SocketAddress remoteAddress) {
+	public ConnectionWatchdog(Bootstrap bootstrap, Timer timer, SocketAddress remoteAddress,BChannelGroup group) {
 		this.bootstrap = bootstrap;
 		this.timer = timer;
 		this.remoteAddress = remoteAddress;
+		this.group = group;
 	}
 	
 	public boolean isReconnect() {
@@ -48,6 +51,10 @@ public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter im
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
 
+        if (group != null) {
+            group.add(channel);
+        }
+        
         attempts = 0;
 
         logger.info("Connects with {}.", channel);

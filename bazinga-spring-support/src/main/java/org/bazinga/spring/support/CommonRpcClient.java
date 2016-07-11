@@ -28,7 +28,7 @@ public class CommonRpcClient implements DefaultCommonClient, InitializingBean {
 	private String host;
 	
 	private SubScribeInfo scribeInfo;
-
+	
 
 	public void afterPropertiesSet() throws Exception {
 		scribeInfo = new SubScribeInfo();

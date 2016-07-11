@@ -1,10 +1,9 @@
 package org.bazinga.client.loadbalance;
 
-import io.netty.util.internal.ConcurrentSet;
-
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.bazinga.common.message.WeightChannel;
+import org.bazinga.common.group.BChannelGroup;
+import org.bazinga.common.group.ServiceBChannelGroup.CopyOnWriteGroupList;
 
 
 
@@ -13,20 +12,20 @@ import org.bazinga.common.message.WeightChannel;
  */
 public class RandomLoadBalance implements LoadBalance {
 
-	public WeightChannel loadBalance(ConcurrentSet<WeightChannel> weightChannels) {
+	public BChannelGroup loadBalance(CopyOnWriteGroupList group) {
 		
-		int count = weightChannels.size();
+		int count = group.size();
 		if (count == 0) {
             throw new IllegalArgumentException("empty elements for select");
         }
-		Object[] wcObjects = weightChannels.toArray();
+		Object[] wcObjects = group.toArray();
 		if(count == 1){
-			return (WeightChannel)(wcObjects[0]);
+			return (BChannelGroup)(wcObjects[0]);
 		}
 		int totalWeight = 0;
         int[] weightSnapshots = new int[count];
         for (int i = 0; i < count; i++) {
-            totalWeight += (weightSnapshots[i] = getWeight((WeightChannel) wcObjects[i]));
+            totalWeight += (weightSnapshots[i] = getWeight((BChannelGroup) wcObjects[i]));
         }
 
 
@@ -46,17 +45,17 @@ public class RandomLoadBalance implements LoadBalance {
             for (int i = 0; i < count; i++) {
                 offset -= weightSnapshots[i];
                 if (offset < 0) {
-                    return (WeightChannel) wcObjects[i];
+                    return (BChannelGroup) wcObjects[i];
                 }
             }
         }
 
-        return (WeightChannel) wcObjects[random.nextInt(count)];
+        return (BChannelGroup) wcObjects[random.nextInt(count)];
 		
 	}
 
-	private int getWeight(WeightChannel weightChannel) {
-		return weightChannel.getWeight();
+	private int getWeight(BChannelGroup channelGroup) {
+		return channelGroup.getWeight();
 	}
 
 

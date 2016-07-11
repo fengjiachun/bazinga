@@ -1,12 +1,11 @@
 package org.bazinga.client.loadbalance;
 
-import io.netty.util.internal.ConcurrentSet;
-
-import org.bazinga.common.message.WeightChannel;
+import org.bazinga.common.group.BChannelGroup;
+import org.bazinga.common.group.ServiceBChannelGroup.CopyOnWriteGroupList;
 
 
 public interface LoadBalance {
 	
-	WeightChannel loadBalance(ConcurrentSet<WeightChannel> weightChannels);
+	BChannelGroup loadBalance(CopyOnWriteGroupList group);
 
 }

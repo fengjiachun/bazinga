@@ -31,15 +31,21 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadFactory;
 
 import org.bazinga.client.Registry;
 import org.bazinga.client.preheater.ConectionPreHeater;
 import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
 import org.bazinga.client.watch.ConnectionWatchdog;
+import org.bazinga.common.UnresolvedAddress;
 import org.bazinga.common.ack.AcknowledgeEncoder;
 import org.bazinga.common.exception.BazingaException;
 import org.bazinga.common.exception.ConnectFailedException;
+import org.bazinga.common.group.BChannelGroup;
+import org.bazinga.common.group.NettyChannelGroup;
+import org.bazinga.common.group.ServiceBChannelGroup;
 import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
@@ -61,6 +67,19 @@ import org.bazinga.common.utils.NativeSupport;
 public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements Registry {
 
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultConsumerRegistry.class);
+	
+	/***假如提供某服务的provider只有一台实例的情况下，我们可以设置消费该服务对provider连接的数量，因为根据netty的模型而言
+	 * 每一个连接都是一个线程单独掌控的运行的
+	 * 假如服务端的reactor的模型中的worker线程数是4个（CPU数）,那么如果我们这边去连接4个连接，那么按照netty模型，正好可以均匀的分配给4个线程
+	 * 这样可以做到最大的QPS
+	 * 
+	 * 如果提供该实例的服务的provider的数量大于调用者的CPU的时候，这边其实我们就每个实例只连接一个channel实例
+	 * 
+	 * ****/
+	//TODO 这边还没有来得及测试，假如本地的CPU的内核数是4，有3个实例提供该服务的情况下的优化，是否去选择一台去做2个连接，发挥最大的性能 
+	private int singleProviderConnectionNum = Runtime.getRuntime().availableProcessors();
+	
+	protected final ConcurrentMap<UnresolvedAddress, BChannelGroup> addressGroups = new ConcurrentHashMap<UnresolvedAddress, BChannelGroup>();
 	
 	/****订阅的服务名*****/
 	private SubScribeInfo info;
@@ -127,7 +146,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 
 		final SocketAddress socketAddress = InetSocketAddress.createUnresolved(host, port);
 
-		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress) {
+		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress,null) {
 
 			public ChannelHandler[] handlers() {
 				return new ChannelHandler[] { 
@@ -295,19 +314,37 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 						
 						logger.info("get service {}",serviceName);
 
-						for (ProviderInfo info : list) {
-							Channel channel = connectToProvider(info.getAddress().getPort(), info.getAddress().getHost());
-							if (null == channel) {
-								logger.warn("port {} and host {} connection failed.", info.getAddress().getPort(), info.getAddress().getHost());
-								continue;
+						//TODO BETA版，默认只有一个提供实例的情况下，去做一provider多连
+						if(list.size() == 1){
+							String onlyHost = list.get(0).getAddress().getHost();
+							int onlyPort = list.get(0).getAddress().getPort();
+							
+							final BChannelGroup group = group(new UnresolvedAddress(list.get(0).getAddress().getHost(), list.get(0).getAddress().getPort()));
+							for(int i = 0;i< singleProviderConnectionNum;i++){
+								Channel channel = connectToProvider(onlyPort, onlyHost);
+								if (null == channel) {
+									logger.warn("port {} and host {} connection failed.", onlyPort, onlyHost);
+									continue;
+								}
 							}
-							addInfo(serviceName, channel, info.getWeight());
+							group.setWeight(list.get(0).getWeight());
+							ServiceBChannelGroup.list(serviceName).addIfAbsent(group);
+						}else{
+							for (ProviderInfo info : list) {
+								Channel channel = connectToProvider(info.getAddress().getPort(), info.getAddress().getHost());
+								if (null == channel) {
+									logger.warn("port {} and host {} connection failed.", info.getAddress().getPort(), info.getAddress().getHost());
+									continue;
+								}
+								final BChannelGroup group = group(new UnresolvedAddress(info.getAddress().getHost(), info.getAddress().getPort()));
+								group.setWeight(info.getWeight());
+								ServiceBChannelGroup.list(serviceName).addIfAbsent(group);
+							}
 						}
-						
 						ConectionPreHeater.finishPreConnection(serviceName);
 						
 						logger.info("receive monitor provider info and will send ACK");
-						_channel.writeAndFlush(new Acknowledge(message.sequence())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);;
+						_channel.writeAndFlush(new Acknowledge(message.sequence())).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
 					}
 					break;
 				case OFFLINE_NOTICE:
@@ -321,4 +358,22 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 	}
 
 	protected abstract Channel connectToProvider(int port, String host);
+	
+	protected BChannelGroup group(UnresolvedAddress address) {
+		
+		BChannelGroup group = addressGroups.get(address);
+		if (group == null) {
+			BChannelGroup newGroup = newChannelGroup(address);
+            group = addressGroups.putIfAbsent(address, newGroup);
+            if (group == null) {
+                group = newGroup;
+            }
+        }
+        return group;
+		
+	}
+	
+	private BChannelGroup newChannelGroup(UnresolvedAddress address) {
+		return new NettyChannelGroup(address);
+	}
 }

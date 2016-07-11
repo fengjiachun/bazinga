@@ -27,7 +27,9 @@ import org.bazinga.client.handler.ConsumerHandler;
 import org.bazinga.client.processor.consumer.DefaultConsumerProcessor;
 import org.bazinga.client.trigger.ConnectorIdleStateTrigger;
 import org.bazinga.client.watch.ConnectionWatchdog;
+import org.bazinga.common.UnresolvedAddress;
 import org.bazinga.common.exception.ConnectFailedException;
+import org.bazinga.common.group.BChannelGroup;
 import org.bazinga.common.idle.IdleStateChecker;
 import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
@@ -127,7 +129,9 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 		
 		final SocketAddress socketAddress = InetSocketAddress.createUnresolved(host, port);
 		
-		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress) {
+		final BChannelGroup group = group(new UnresolvedAddress(host, port));
+		
+		final ConnectionWatchdog watchdog = new ConnectionWatchdog(boot, timer, socketAddress,group) {
 
 			public ChannelHandler[] handlers() {
 				return new ChannelHandler[] {
@@ -162,11 +166,8 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 	}
 
 
-
 	private Bootstrap bootstrap() {
 		return bootstrap;
 	}
 	
-	
-
 }
