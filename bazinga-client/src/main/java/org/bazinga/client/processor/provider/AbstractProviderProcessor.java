@@ -13,8 +13,8 @@ import org.bazinga.common.message.ResultMessageWrapper;
 /**
  * 服务端当服务于处理请求时的时候，对异常的处理
  * @author BazingaLyncc
- *
- * @time
+ * @copyright fjc
+ * @time 2016年6月13日
  */
 public abstract class AbstractProviderProcessor implements ProviderProcessor {
 	

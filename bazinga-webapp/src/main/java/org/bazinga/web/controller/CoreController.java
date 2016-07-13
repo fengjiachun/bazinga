@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 import org.bazinga.common.message.RegistryInfo.Address;
+import org.bazinga.common.message.RegistryInfo.RpcService;
 import org.bazinga.monitor.registryInfo.RegistryContext;
 import org.bazinga.spring.support.CommonRpcMonitor;
 import org.bazinga.web.vo.RpcServiceVo;
@@ -39,7 +40,7 @@ public class CoreController {
 		List<RpcServiceVo> rpcServiceVos = new ArrayList<RpcServiceVo>();
 		
 		registryContext = commonRpcMonitor.getBazingaMonitor().getRegistryContext();
-		ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceInfos = registryContext.getServiceInfo();
+		ConcurrentMap<String, ConcurrentMap<Address, RpcService>> serviceInfos = registryContext.getServiceInfo();
 
 		Set<String> serviceNames = serviceInfos.keySet();
 		if (null != serviceNames && serviceNames.size() > 0) {

@@ -35,11 +35,14 @@ import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
 import org.bazinga.common.utils.NativeSupport;
 
+import static org.bazinga.common.utils.Constants.AVAILABLE_PROCESSORS;
+import static org.bazinga.common.utils.Constants.READER_IDLE_TIME_SECONDS;
+
 /**
  * 服务的提供者，从Netty的server/client角度上来说
  * 此类是server 用来处理消费者发送的服务请求
  * @author BazingaLyn
- *
+ * @copyright fjc
  * @time
  */
 public class DefaultProvider extends DefaultProviderRegistry {
@@ -66,10 +69,6 @@ public class DefaultProvider extends DefaultProviderRegistry {
     private final boolean nativeEt;
     
     private int nWorkers;
-    
-    public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
-    
-    public static final int READER_IDLE_TIME_SECONDS =  60;
     
     protected volatile ByteBufAllocator allocator;
     
@@ -114,7 +113,7 @@ public class DefaultProvider extends DefaultProviderRegistry {
 		registryInfo.setAddress(address);
 		List<org.bazinga.common.message.RegistryInfo.RpcService> rpcSerivces = new ArrayList<org.bazinga.common.message.RegistryInfo.RpcService>();
 		for(ServiceWrapper serviceWrapper :serviceWrappers){
-			org.bazinga.common.message.RegistryInfo.RpcService rpcService = new org.bazinga.common.message.RegistryInfo.RpcService(serviceWrapper.getServiceName(),serviceWrapper.getWeight(),serviceWrapper.getAppName(),serviceWrapper.getResponsiblityName());
+			org.bazinga.common.message.RegistryInfo.RpcService rpcService = new org.bazinga.common.message.RegistryInfo.RpcService(serviceWrapper.getServiceName(),serviceWrapper.getWeight(),serviceWrapper.getAppName(),serviceWrapper.getResponsiblityName(),serviceWrapper.getConnCount());
 			rpcSerivces.add(rpcService);
 		}
 		registryInfo.setRpcServices(rpcSerivces);
@@ -122,11 +121,13 @@ public class DefaultProvider extends DefaultProviderRegistry {
 	}
 	
 	private void doInit() {
+		
 		ThreadFactory bossFactory = new DefaultThreadFactory("bazinga.acceptor.boss");
         ThreadFactory workerFactory = new DefaultThreadFactory("bazinga.acceptor.worker");
         boss = initEventLoopGroup(1, bossFactory);
         worker = initEventLoopGroup(nWorkers, workerFactory);
         bootstrap = new ServerBootstrap().group(boss, worker);
+        
         //使用池化的directBuffer
         allocator = new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
         

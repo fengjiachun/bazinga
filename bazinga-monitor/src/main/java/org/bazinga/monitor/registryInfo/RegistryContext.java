@@ -17,19 +17,17 @@ import org.bazinga.common.message.RegistryInfo.RpcService;
  */
 public class RegistryContext {
 	
-	//TODO
 	/******一个提供服务的地址，提供的所有服务******/
 	private ConcurrentMap<Address,ConcurrentSet<RpcService>> globalInfo = new ConcurrentHashMap<RegistryInfo.Address, ConcurrentSet<RpcService>>();
 	
 	/************一个服务，他是由哪些地址提供的,每个地址的权重多大************/
-	private ConcurrentMap<String,ConcurrentMap<Address,Integer>> serviceInfo = new ConcurrentHashMap<String, ConcurrentMap<Address,Integer>>();
+	private ConcurrentMap<String,ConcurrentMap<Address,RpcService>> serviceInfo = new ConcurrentHashMap<String, ConcurrentMap<Address,RpcService>>();
 	
-	//TODO
 	/*************一个服务被哪些消费者消费****************/
 	private ConcurrentMap<String,ArrayList<Address>> comsumerInfo = new ConcurrentHashMap<String, ArrayList<Address>>();
 	
 	
-    public ConcurrentMap<Address,Integer> getProviderInfoByServiceName(String serviceName){
+    public ConcurrentMap<Address,RpcService> getProviderInfoByServiceName(String serviceName){
     	
     	return serviceInfo.get(serviceName);
     	
@@ -50,7 +48,7 @@ public class RegistryContext {
     		for(RpcService rpcService:rpcServices){
     			String serviceName = rpcService.getServiceName();
     			
-    			ConcurrentMap<Address, Integer> map = serviceInfo.get(serviceName);
+    			ConcurrentMap<Address, RpcService> map = serviceInfo.get(serviceName);
     			
     			if(null != map){
     				map.remove(address);
@@ -74,10 +72,6 @@ public class RegistryContext {
 		}
 		rpcServices.addAll(registryInfo.getRpcServices());
 		
-		
-		//TODO NEED ?
-		globalInfo.put(address, rpcServices);
-		
 		/************2 STEP************/
 		List<RpcService> rpcServicesList = registryInfo.getRpcServices();
 		
@@ -87,12 +81,12 @@ public class RegistryContext {
 				
 				String serviceName = rpcService.getServiceName();
 				
-				ConcurrentMap<Address,Integer> map = serviceInfo.get(serviceName);
+				ConcurrentMap<Address,RpcService> map = serviceInfo.get(serviceName);
 				
 				if(null == map){
-					map = new ConcurrentHashMap<RegistryInfo.Address, Integer>();
+					map = new ConcurrentHashMap<RegistryInfo.Address, RpcService>();
 				}
-				map.put(address, rpcService.getWeight());
+				map.put(address, rpcService);
 				
 				serviceInfo.put(serviceName, map);
 			}
@@ -107,11 +101,11 @@ public class RegistryContext {
 		this.globalInfo = globalInfo;
 	}
 
-	public ConcurrentMap<String, ConcurrentMap<Address, Integer>> getServiceInfo() {
+	public ConcurrentMap<String, ConcurrentMap<Address, RpcService>> getServiceInfo() {
 		return serviceInfo;
 	}
 
-	public void setServiceInfo(ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceInfo) {
+	public void setServiceInfo(ConcurrentMap<String, ConcurrentMap<Address, RpcService>> serviceInfo) {
 		this.serviceInfo = serviceInfo;
 	}
 

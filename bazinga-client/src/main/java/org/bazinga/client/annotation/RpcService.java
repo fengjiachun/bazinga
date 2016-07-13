@@ -13,11 +13,13 @@ public @interface RpcService {
 	
 	public String serviceName() default "";
 	
-	public int weight() default 5;
+	public int weight() default 50;
 	
 	public String appName() default "bazinga";
 	
 	public String responsibilityName() default "system";
+	
+	public int connCount() default 1;
 	
 
 }

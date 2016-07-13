@@ -6,6 +6,7 @@ import static org.bazinga.common.protocol.BazingaProtocol.OFFLINE_NOTICE;
 import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
 import static org.bazinga.common.protocol.BazingaProtocol.SUBSCRIBE_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
+import static org.bazinga.common.utils.Constants.READER_IDLE_TIME_SECONDS;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -82,8 +83,6 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 	
 	private ChannelGroup subscribeChannels = new DefaultChannelGroup("subscribers", GlobalEventExecutor.INSTANCE);
 	
-	protected RegistryContext registryContext = new RegistryContext();
-	
 	private final ConcurrentMap<String, MessageNonAck> messagesNonAck = new ConcurrentHashMap<String, MessageNonAck>();
 	
 	public static final AttributeKey<ConcurrentSet<String>> NETTY_CHANNEL_SUBSCRIBERS = AttributeKey.valueOf("netty.channel.subscribers");
@@ -95,8 +94,6 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
 	
 	private final AcknowledgeEncoder ackEncoder = new AcknowledgeEncoder();
-	
-	public static final int READER_IDLE_TIME_SECONDS =  60;
 	
 	
 	public BazingaMonitor(int port) {
@@ -163,9 +160,8 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 		
 		@Override
 		public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+			
 			Channel channel  = ctx.channel();
-			
-			
 			
 			Attribute<RegistryInfo> attr = channel.attr(NETTY_CHANNEL_PUBLISH);
 			RegistryInfo registryInfo = attr.get();
@@ -237,7 +233,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 			
 			for(String eachServiceName:subScribeInfo.getServiceNames()){
 				
-				ConcurrentMap<Address, Integer>  providerInfos = registryContext.getProviderInfoByServiceName(eachServiceName);
+				ConcurrentMap<Address, RpcService>  providerInfos = registryContext.getProviderInfoByServiceName(eachServiceName);
 				
 				if(null == providerInfos || providerInfos.isEmpty()){
 					
@@ -255,10 +251,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 		        messagesNonAck.put(msgNonAck.id, msgNonAck);
 		        
 		        channel.writeAndFlush(msg);
-				
 			}
-			
-			
 		}
 		
 	}
@@ -269,14 +262,14 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 	 * @param eachServiceName 
 	 * @return
 	 */
-	private ProviderInfos createRpcService(ConcurrentMap<Address, Integer> providerInfos, String eachServiceName) {
+	private ProviderInfos createRpcService(ConcurrentMap<Address, RpcService> providerInfos, String eachServiceName) {
 		
 		List<ProviderInfo> providerInfoLists = new ArrayList<ProviderInfo>();
 		
-		Set<Entry<Address, Integer>> entries = providerInfos.entrySet();
+		Set<Entry<Address, RpcService>> entries = providerInfos.entrySet();
 		
-		for(Entry<Address, Integer> obj:entries){
-			ProviderInfo providerInfo = new ProviderInfo(obj.getKey(), obj.getValue());
+		for(Entry<Address, RpcService> obj:entries){
+			ProviderInfo providerInfo = new ProviderInfo(obj.getKey(), obj.getValue().getWeight(),obj.getValue().getConnCount());
 			providerInfoLists.add(providerInfo);
 		}
 		
@@ -331,7 +324,7 @@ public class BazingaMonitor extends DefaultMonitorConfig {
 				
 				final String serviceName = rpcService.getServiceName();
 				
-				ConcurrentMap<Address, Integer> providerInfos = registryContext.getProviderInfoByServiceName(serviceName);
+				ConcurrentMap<Address, RpcService> providerInfos = registryContext.getProviderInfoByServiceName(serviceName);
 				
 				ProviderInfos providerInfosList = createRpcService(providerInfos,serviceName);
 				

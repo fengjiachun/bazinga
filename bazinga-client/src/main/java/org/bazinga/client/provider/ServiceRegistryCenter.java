@@ -72,13 +72,14 @@ public class ServiceRegistryCenter implements RegistryCenterFactory {
 						String appName = rpcService.appName();
 						String responsiblityName = rpcService.responsibilityName();
 						Integer weight = rpcService.weight();
+						Integer connCount = rpcService.connCount();
 						
 						String methodName = method.getName();
 						Class<?>[] classes = method.getParameterTypes();
 						List<Class<?>[]> paramters = new ArrayList<Class<?>[]>();
 						paramters.add(classes);
 						
-						ServiceWrapper serviceWrapper = new ServiceWrapper(serviceProvider,serviceName,methodName,paramters,appName,responsiblityName,weight);
+						ServiceWrapper serviceWrapper = new ServiceWrapper(serviceProvider,serviceName,methodName,paramters,appName,responsiblityName,weight,connCount);
 						
 						serviceWrappers.add(serviceWrapper);
 					}

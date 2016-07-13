@@ -12,17 +12,17 @@ import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Response;
 import org.bazinga.common.spi.BazingaServiceLoader;
 
+import static org.bazinga.common.utils.Constants.PROCESSOR_CORE_NUM_WORKERS;
+
 /**
  * 消费者端的响应处理器
  * @author BazingaLyn
- *
+ * @copyright fjc
  * @time 2016年6月27日
  */
 public class DefaultConsumerProcessor implements ConsumerProvider {
 	
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultConsumerProcessor.class);
-	
-	public static final int PROCESSOR_CORE_NUM_WORKERS = Runtime.getRuntime().availableProcessors();
 	
 	private final Executor executor;
 	

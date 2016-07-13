@@ -17,10 +17,21 @@ import java.util.concurrent.ThreadFactory;
 
 import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
+import org.bazinga.monitor.registryInfo.RegistryContext;
 
+import static org.bazinga.common.utils.Constants.AVAILABLE_PROCESSORS;
+
+/**
+ * 
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time
+ */
 public abstract class DefaultMonitorConfig implements AcceptorConfig {
 	
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultMonitorConfig.class);
+	
+	protected RegistryContext registryContext = new RegistryContext();
 	
 	private ServerBootstrap bootstrap;
 	protected final SocketAddress localAddress;
@@ -29,8 +40,6 @@ public abstract class DefaultMonitorConfig implements AcceptorConfig {
     private EventLoopGroup worker;
     
     private int nWorkers;
-    
-    public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
     
     protected volatile ByteBufAllocator allocator;
     

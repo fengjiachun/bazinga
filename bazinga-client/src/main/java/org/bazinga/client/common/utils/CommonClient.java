@@ -1,6 +1,9 @@
 package org.bazinga.client.common.utils;
 
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
+import static org.bazinga.common.utils.Constants.DEFAULT_TIMEOUT;
+import static org.bazinga.common.utils.Constants.NO_AVAILABLE_WRITEBUFFER_HIGHWATERMARK;
+import static org.bazinga.common.utils.Constants.NO_AVAILABLE_WRITEBUFFER_LOWWATERMARK;
 
 import org.bazinga.client.comsumer.DefaultConsumer;
 import org.bazinga.client.dispatcher.DefaultDispatcher;
@@ -14,14 +17,18 @@ import org.bazinga.common.message.Request;
 import org.bazinga.common.message.RequestMessageWrapper;
 import org.bazinga.common.message.SubScribeInfo;
 
+/**
+ * 提供调用端一个简单的client
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time
+ */
 public class CommonClient extends DefaultConsumer implements DefaultCommonClient {
 
-	private final static long DEFAULT_TIME_OUT = 5000;
-	
 	private boolean preHeatStatus = true;
 
 	public CommonClient(SubScribeInfo info) {
-		super(info,-1,-1);
+		super(info,NO_AVAILABLE_WRITEBUFFER_HIGHWATERMARK,NO_AVAILABLE_WRITEBUFFER_LOWWATERMARK);
 	}
 	
 	public CommonClient(SubScribeInfo info,int writeBufferHighWaterMark,int writeBufferLowWaterMark) {
@@ -29,7 +36,7 @@ public class CommonClient extends DefaultConsumer implements DefaultCommonClient
 	}
 
 	public Object call(String serviceName, Object... args) throws Throwable {
-		return call(serviceName, DEFAULT_TIME_OUT, args);
+		return call(serviceName, DEFAULT_TIMEOUT, args);
 
 	}
 
@@ -56,7 +63,6 @@ public class CommonClient extends DefaultConsumer implements DefaultCommonClient
 		RequestMessageWrapper message = new RequestMessageWrapper(serviceName, args);
 		request.setMessageWrapper(message);
 		request.bytes(serializerImpl().writeObject(message));
-//		WeightChannel weightChannel = loadBalance(channels);
 
 		DefaultResultGather defaultResultGather = new DefaultDispatcher().dispatcher(channelGroup.next(), request,timeout);
 

@@ -73,18 +73,18 @@ public class SimpleMonitor {
 					}
 					
 					
-					ConcurrentMap<String, ConcurrentMap<Address, Integer>> serviceMaps = registryContext.getServiceInfo();
+					ConcurrentMap<String, ConcurrentMap<Address, RpcService>> serviceMaps = registryContext.getServiceInfo();
 					
 					if(serviceMaps.keySet().isEmpty()){
 						logger.info("当前时间 {} 没有任何服务",simpleDateFormat.format(new Date()));
 					}else{
-						Set<Entry<String, ConcurrentMap<Address, Integer>>> entries = serviceMaps.entrySet();
-						for(Entry<String, ConcurrentMap<Address, Integer>> entry : entries){
+						Set<Entry<String, ConcurrentMap<Address, RpcService>>> entries = serviceMaps.entrySet();
+						for(Entry<String, ConcurrentMap<Address, RpcService>> entry : entries){
 							String serviceName = entry.getKey();
-							ConcurrentMap<Address, Integer> details = entry.getValue();
-							Set<Entry<Address, Integer>> detailsSet = details.entrySet();
-							for(Entry<Address, Integer> eachDetail : detailsSet){
-								logger.info("服务 {} ,是由{}该地址提供的并且它的负重是{}",serviceName,eachDetail.getKey(),eachDetail.getValue());
+							ConcurrentMap<Address, RpcService> details = entry.getValue();
+							Set<Entry<Address, RpcService>> detailsSet = details.entrySet();
+							for(Entry<Address, RpcService> eachDetail : detailsSet){
+								logger.info("服务 {} ,是由{}该地址提供的并且它的负重是{},连接数是{}",serviceName,eachDetail.getKey(),eachDetail.getValue().getWeight(),eachDetail.getValue().getConnCount());
 							}
 									
 						}

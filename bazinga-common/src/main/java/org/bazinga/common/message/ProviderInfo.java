@@ -6,14 +6,18 @@ public class ProviderInfo {
 	
 	private Address address;
 	
-	private Integer weight;
+	private int weight;
+	
+	private int connCount;
+	
 	
 	public ProviderInfo() {
 	}
 	
-	public ProviderInfo(Address address, Integer weight) {
+	public ProviderInfo(Address address, int weight,int connCount) {
 		this.address = address;
 		this.weight = weight;
+		this.connCount = connCount;
 	}
 
 	public Address getAddress() {
@@ -24,18 +28,25 @@ public class ProviderInfo {
 		this.address = address;
 	}
 
-	public Integer getWeight() {
+	public int getWeight() {
 		return weight;
 	}
 
-	public void setWeight(Integer weight) {
+	public void setWeight(int weight) {
 		this.weight = weight;
 	}
 
+	public int getConnCount() {
+		return connCount;
+	}
+
+	public void setConnCount(int connCount) {
+		this.connCount = connCount;
+	}
 
 	@Override
 	public String toString() {
-		return "ProviderInfo [address=" + address + ", weight=" + weight + "]";
+		return "ProviderInfo [address=" + address + ", weight=" + weight + ", connCount=" + connCount + "]";
 	}
 
 }

@@ -7,6 +7,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 
+/**
+ * 
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time 2016年6月13日
+ */
 public class RejectedTaskPolicyWithReport implements RejectedExecutionHandler {
 
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(RejectedTaskPolicyWithReport.class);

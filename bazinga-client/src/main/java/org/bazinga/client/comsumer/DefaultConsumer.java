@@ -1,6 +1,9 @@
 package org.bazinga.client.comsumer;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.bazinga.common.utils.Constants.AVAILABLE_PROCESSORS;
+import static org.bazinga.common.utils.Constants.NO_AVAILABLE_WRITEBUFFER_HIGHWATERMARK;
+import static org.bazinga.common.utils.Constants.NO_AVAILABLE_WRITEBUFFER_LOWWATERMARK;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
@@ -31,8 +34,6 @@ import org.bazinga.common.UnresolvedAddress;
 import org.bazinga.common.exception.ConnectFailedException;
 import org.bazinga.common.group.BChannelGroup;
 import org.bazinga.common.idle.IdleStateChecker;
-import org.bazinga.common.logger.InternalLogger;
-import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.utils.NamedThreadFactory;
 import org.bazinga.common.utils.NativeSupport;
@@ -43,8 +44,6 @@ import org.bazinga.common.utils.NativeSupport;
  * 默认的消费者端
  */
 public class DefaultConsumer extends DefaultConsumerRegistry {
-	
-	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultConsumer.class);
 	
 	private RequestEncoder encoder = new RequestEncoder();
 	private ConsumerHandler handler = new ConsumerHandler(new DefaultConsumerProcessor());
@@ -62,8 +61,6 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
     
     private final ConnectorIdleStateTrigger idleStateTrigger = new ConnectorIdleStateTrigger();
     
-    public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
-    
     public static final int WRITER_IDLE_TIME_SECONDS = 30;
     
     private volatile int writeBufferHighWaterMark = -1;
@@ -80,7 +77,7 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 	}
 	
 	public DefaultConsumer(SubScribeInfo info) {
-		this(info, -1, -1);
+		this(info, NO_AVAILABLE_WRITEBUFFER_HIGHWATERMARK, NO_AVAILABLE_WRITEBUFFER_LOWWATERMARK);
 	}
 	
 	private void init() {

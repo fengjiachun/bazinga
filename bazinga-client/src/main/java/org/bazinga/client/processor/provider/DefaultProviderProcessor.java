@@ -14,18 +14,18 @@ import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Request;
 import org.bazinga.common.spi.BazingaServiceLoader;
 
+import static org.bazinga.common.utils.Constants.PROCESSOR_CORE_NUM_WORKERS;
+
 /**
  * 默认的提供端的请求处理器
  * 封装一个task{@link MessageTask}并使用注入的executor来处理请求
  * @author BazingaLyn
- *
+ * @copyright fjc
  * @time
  */
 public class DefaultProviderProcessor extends AbstractProviderProcessor {
 	
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultProviderProcessor.class);
-	
-	public static final int AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
 	
 	private DefaultProvider defaultProvider;
 	
@@ -35,7 +35,7 @@ public class DefaultProviderProcessor extends AbstractProviderProcessor {
 		this.defaultProvider = defaultProvider;
 		
 		ExecutorFactory factory = (ExecutorFactory) BazingaServiceLoader.load(ProviderExecutorFactory.class);
-        executor = factory.newExecutor(AVAILABLE_PROCESSORS << 1);
+        executor = factory.newExecutor(PROCESSOR_CORE_NUM_WORKERS);
 		
 	}
 
