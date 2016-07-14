@@ -7,32 +7,6 @@ import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
 import static org.bazinga.common.protocol.BazingaProtocol.SUBSCRIBE_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import static org.bazinga.common.utils.Constants.READER_IDLE_TIME_SECONDS;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.ChannelMatcher;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.handler.codec.ReplayingDecoder;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.concurrent.GlobalEventExecutor;
-import io.netty.util.internal.ConcurrentSet;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -59,20 +33,51 @@ import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
 import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
-import org.bazinga.common.transport.netty.NettyAccpetor;
+import org.bazinga.common.transport.netty.NettyAcceptor;
 import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
-import org.bazinga.common.utils.NamedThreadFactory;
 import org.bazinga.common.utils.NativeSupport;
 import org.bazinga.common.utils.SystemClock;
+import org.bazinga.registry.registryInfo.RegistryContext;
+
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.ChannelMatcher;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.handler.codec.ReplayingDecoder;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.internal.ConcurrentSet;
 
 /**
  * 注册端
+ * consumer端和provider端都需要向其注册信息
+ * registry宕掉之后，consumer和provider都需要向其主动重连
+ * 
+ * 所有的注册信息都会放置在内存里面，如果registry宕掉之后则所有信息丢失，consumer和provider端重新向其注册信息
  * @author BazingaLyncc
- *
- * @time
+ * @copyright fjc
+ * @time 2016年7月14日23:01:19
  */
-public class DefaultRegistryServer extends NettyAccpetor implements RegistryServer {
+public class DefaultRegistryServer extends NettyAcceptor implements RegistryServer {
 	
+	//logger
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultRegistryServer.class);
 	
 	private final boolean nativeEt;
@@ -89,11 +94,11 @@ public class DefaultRegistryServer extends NettyAccpetor implements RegistryServ
 	
 	public static final AttributeKey<RegistryInfo> NETTY_CHANNEL_PUBLISH = AttributeKey.valueOf("netty.channel.publish");
 	
-	protected final HashedWheelTimer timer = new HashedWheelTimer(new NamedThreadFactory("monitor.timer"));
-	
 	private final AcceptorIdleStateTrigger idleStateTrigger = new AcceptorIdleStateTrigger();
 	
 	private final AcknowledgeEncoder ackEncoder = new AcknowledgeEncoder();
+	
+	protected RegistryContext registryContext = new RegistryContext();
 	
 	
 	public DefaultRegistryServer(int port) {
