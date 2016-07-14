@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.shine</groupId>
 	<artifactId>bazinga</artifactId>
@@ -9,11 +8,12 @@
 	<modules>
 		<module>bazinga-common</module>
 		<module>bazinga-client</module>
+        <module>bazinga-registry</module>
 		<module>bazinga-monitor</module>
 		<module>bazinga-example</module>
 		<module>bazinga-spring-support</module>
 		<module>bazinga-webapp</module>
-	</modules>
+  </modules>
 
 	<properties>
 		<netty.version>4.1.0.Final</netty.version>
@@ -51,6 +51,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>bazinga-spring-support</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>bazinga-registry</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

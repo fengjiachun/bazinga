@@ -5,7 +5,8 @@ import io.netty.channel.Channel;
 /**
  * 
  * @author BazingaLyn
- * channelGroup 表示同一类的channel可以放在一个group中
+ * channelGroup 无状态的Group,与服务无关，只是表示某台实例的channel的集合
+ * @copyright fjc
  * @time 2016年7月11日
  */
 public interface BChannelGroup {
@@ -21,5 +22,7 @@ public interface BChannelGroup {
 	int getWeight();
 	
 	int size();
+	
+	boolean isAvailable();
 
 }

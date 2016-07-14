@@ -12,6 +12,11 @@ import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.utils.SystemClock;
 
+/**
+ * 链接越热工具，模仿getresult时的promise的方式
+ * @author BazingaLyn
+ * @time 2016年6月14日
+ */
 public class ConectionPreHeater {
 
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ConectionPreHeater.class);

@@ -9,6 +9,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bazinga.common.UnresolvedAddress;
 
+/**
+ * 
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time  modifyTime 2016年7月14日
+ */
 public class NettyChannelGroup implements BChannelGroup {
 	
 	
@@ -80,6 +86,11 @@ public class NettyChannelGroup implements BChannelGroup {
 	@Override
 	public int size() {
 		return channels.size();
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return channels.size() > 0 ? true :  false;
 	}
 
 }

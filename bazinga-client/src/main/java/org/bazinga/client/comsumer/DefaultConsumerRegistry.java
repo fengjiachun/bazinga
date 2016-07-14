@@ -59,7 +59,7 @@ import org.bazinga.common.utils.NativeSupport;
 /**
  * 消费端向monitor端注册所需的服务
  * @author BazingaLyn
- *
+ * @copyright fjc
  * @time
  */
 public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements Registry {
@@ -306,20 +306,26 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 							String remoteHost = info.getAddress().getHost();
 							int remotePort = info.getAddress().getPort();
 							
-							int connCount = info.getConnCount() < 0 ? 1 : info.getConnCount();
+							final BChannelGroup group = group(new UnresolvedAddress(remoteHost, remotePort));
 							
-							for(int i = 0;i< connCount;i++){
-								Channel channel = connectToProvider(remotePort, remoteHost);
-								if (null == channel) {
-									logger.warn("port {} and host {} connection failed.", remotePort, remoteHost);
-									continue;
+							//链路复用，如果此host和port对应的链接的channelGroup是已经存在的，则无需建立新的链接，只需要将此group与service建立关系即可
+							if(!group.isAvailable()){
+								
+								int connCount = info.getConnCount() < 0 ? 1 : info.getConnCount();
+								
+								for(int i = 0;i< connCount;i++){
+									Channel channel = connectToProvider(remotePort, remoteHost);
+									if (null == channel) {
+										logger.warn("port {} and host {} connection failed.", remotePort, remoteHost);
+										continue;
+									}
 								}
 							}
 							
-							final BChannelGroup group = group(new UnresolvedAddress(remoteHost, remotePort));
 							group.setWeight(info.getWeight());
 							ServiceBChannelGroup.list(serviceName).addIfAbsent(group);
 						}
+						//到此为止，说明该服务的链路已经建立成功，该服务算预热成功，可以远程调用
 						ConectionPreHeater.finishPreConnection(serviceName);
 						
 						logger.info("receive monitor provider info and will send ACK");

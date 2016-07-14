@@ -24,13 +24,7 @@ public class SimpleMonitor {
 	private static final SimpleDateFormat simpleDateFormat =  new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
 	public static void main(String[] args) throws InterruptedException {
-		int port;
-		if (args.length > 0) {
-			port = Integer.parseInt(args[0]);
-		} else {
-			port = 18899;
-		}
-		bazingaMonitor = new BazingaMonitor(port);
+		bazingaMonitor = new BazingaMonitor(18899);
 		Thread thread = new Thread(new MonitorScanner(),"monitor.console.scanner");
 		thread.start();
 		bazingaMonitor.start();
