@@ -161,23 +161,8 @@ public class DefaultRegistryServer extends NettyAcceptor implements RegistryServ
             }
         });
 
-        setOptions();
 
         return boot.bind(localAddress);
-	}
-
-	private void setOptions() {
-		ServerBootstrap boot = bootstrap();
-
-        // parent options
-        boot.option(ChannelOption.SO_BACKLOG, 1024);
-        boot.option(ChannelOption.SO_REUSEADDR, true);
-
-        // child options
-        boot.childOption(ChannelOption.SO_REUSEADDR, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
 	}
 
 	@Override

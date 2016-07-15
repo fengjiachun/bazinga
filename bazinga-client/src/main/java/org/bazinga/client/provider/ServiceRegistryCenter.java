@@ -22,7 +22,12 @@ import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 
 
-
+/**
+ * 注册服务的工厂中心，用来进行service服务的编织
+ * @author BazingaLyn
+ * @copyright fjc
+ * @modifytime 2016年7月15日14:47:24
+ */
 public class ServiceRegistryCenter implements RegistryCenterFactory {
 	
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(ServiceRegistryCenter.class);

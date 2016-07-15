@@ -43,21 +43,13 @@ public class BenchmarkClient {
 
 		int processors = Runtime.getRuntime().availableProcessors();
 
-		int port = 8080;
-		if (args != null && args.length > 0) {
-			try {
-				port = Integer.valueOf(args[0]);
-			} catch (NumberFormatException e) {
-				// 采用默认值
-			}
-		}
 		SubScribeInfo info = new SubScribeInfo();
 		List<String> servicesNames = new ArrayList<String>();
 		
 		servicesNames.add("BAZINGA.NM.DEMOSERVICE.SAYHELLO");
 		info.setServiceNames(servicesNames);
 		final CommonClient commonClient = new CommonClient(info, WRITE_BUFFER_HIGH_WATER_MARK, WRITE_BUFFER_LOW_WATER_MARK);
-		commonClient.connectToRegistryServer(port, "127.0.0.1");
+		commonClient.connectToRegistryServer(8080, "127.0.0.1");
 
 		/**
 		 * 因为这是性能极限测试，TCP协议是慢启动的，滑窗的大小是逐渐变大，并且趋于稳定的，
