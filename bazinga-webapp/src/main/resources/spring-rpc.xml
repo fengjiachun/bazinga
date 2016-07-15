@@ -11,9 +11,5 @@
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
        
-       <bean id="monitor" class="org.bazinga.spring.support.CommonRpcMonitor">
-          <property name="port" value="18899"/>
-       </bean>
-       
     
 </beans>

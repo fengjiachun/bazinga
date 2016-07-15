@@ -4,10 +4,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.bazinga.common.protocol.BazingaProtocol.ACK;
 import static org.bazinga.common.protocol.BazingaProtocol.MAGIC;
 import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
+import static org.bazinga.common.utils.Constants.WRITER_IDLE_TIME_SECONDS;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -16,15 +16,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.DefaultMessageSizeEstimator;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.ReplayingDecoder;
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -45,14 +41,14 @@ import org.bazinga.common.message.Acknowledge;
 import org.bazinga.common.message.Message;
 import org.bazinga.common.message.RegistryInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
-import org.bazinga.common.utils.NamedThreadFactory;
+import org.bazinga.common.transport.netty.NettyConnector;
 import org.bazinga.common.utils.NativeSupport;
 import org.bazinga.common.utils.SystemClock;
 
 /**
  * provider端代码
  */
-public class DefaultProviderRegistry extends ServiceRegistryCenter implements Registry {
+public class DefaultProviderRegistry extends NettyConnector implements Registry {
 
 	private static final InternalLogger logger = InternalLoggerFactory.getInstance(DefaultProviderRegistry.class);
 
@@ -62,18 +58,7 @@ public class DefaultProviderRegistry extends ServiceRegistryCenter implements Re
 
 	private RegistryInfo info;
 
-	private Bootstrap bootstrap;
-
-	private EventLoopGroup worker;
-	private int nWorkers;
-
 	private final boolean nativeEt;
-
-	protected volatile ByteBufAllocator allocator;
-
-	protected final HashedWheelTimer timer = new HashedWheelTimer(new NamedThreadFactory("consumer.registry.timer"));
-
-	public static final int WRITER_IDLE_TIME_SECONDS = 30;
 
 	private final ConnectorIdleStateTrigger idleStateTrigger = new ConnectorIdleStateTrigger();
 	
@@ -84,29 +69,18 @@ public class DefaultProviderRegistry extends ServiceRegistryCenter implements Re
 		this.nativeEt = true;
 		init();
 	}
-
-	private void init() {
-		ThreadFactory workerFactory = new DefaultThreadFactory("baiznga.connector");
-		worker = initEventLoopGroup(nWorkers, workerFactory);
-
-		bootstrap = new Bootstrap().group(worker);
-
-		if (worker instanceof EpollEventLoopGroup) {
-			((EpollEventLoopGroup) worker).setIoRatio(100);
-		} else if (worker instanceof NioEventLoopGroup) {
-			((NioEventLoopGroup) worker).setIoRatio(100);
-		}
-
-		bootstrap.option(ChannelOption.ALLOCATOR, allocator).option(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
-				.option(ChannelOption.SO_REUSEADDR, true).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) SECONDS.toMillis(3))
-				.channel(NioSocketChannel.class);
-
-		bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.ALLOW_HALF_CLOSURE, false);
+	
+	@Override
+	protected void init() {
+		super.init();
+		bootstrap().option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) SECONDS.toMillis(3));
+		
 	}
+	
+    protected EventLoopGroup initEventLoopGroup(int nWorkers, ThreadFactory workerFactory) {
+    	return isNativeEt() ? new EpollEventLoopGroup(nWorkers, workerFactory) : new NioEventLoopGroup(nWorkers, workerFactory);
+    };
 
-	private EventLoopGroup initEventLoopGroup(int nWorkers, ThreadFactory workerFactory) {
-		return isNativeEt() ? new EpollEventLoopGroup(nWorkers, workerFactory) : new NioEventLoopGroup(nWorkers, workerFactory);
-	}
 
 	private boolean isNativeEt() {
 		return nativeEt && NativeSupport.isSupportNativeET();
@@ -134,7 +108,7 @@ public class DefaultProviderRegistry extends ServiceRegistryCenter implements Re
 		watchdog.setReconnect(true);
 		ChannelFuture future;
 		try {
-			synchronized (bootstrap) {
+			synchronized (bootstrap()) {
 				boot.handler(new ChannelInitializer<Channel>() {
 
 					@Override
@@ -151,10 +125,6 @@ public class DefaultProviderRegistry extends ServiceRegistryCenter implements Re
 		}
 	}
 
-	private Bootstrap bootstrap() {
-		return bootstrap;
-	}
-	
 	static class MessageDecoder extends ReplayingDecoder<MessageDecoder.State> {
 
         public MessageDecoder() {
