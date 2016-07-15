@@ -37,7 +37,7 @@ import com.codahale.metrics.Timer;
  * 
  * @author BazingaLyn
  * @copyright fjc
- * @time
+ * @time 2016年7月15日17:08:38
  */
 public class MessageTask implements RejectedRunnable {
 

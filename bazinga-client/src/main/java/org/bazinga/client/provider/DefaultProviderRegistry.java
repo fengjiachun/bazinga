@@ -219,10 +219,10 @@ public class DefaultProviderRegistry extends NettyConnector implements Registry 
 		
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-			logger.info("收到monitor端的信息，准备解析");
+			logger.info("收到registry端的信息，准备解析");
 			
 			if(msg instanceof Acknowledge){
-				logger.info("收到monitor端的Ack信息，无需再次发送注册信息");
+				logger.info("收到registry端的Ack信息，无需再次发送注册信息");
 				messagesNonAcks.remove(((Acknowledge)msg).sequence());
 			}
 		}

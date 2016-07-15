@@ -11,6 +11,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.bazinga.client.processor.RejectedTaskPolicyWithReport;
 import org.bazinga.common.utils.NamedThreadFactory;
 
+/**
+ * 
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time
+ */
 public class ThreadPoolExecutorFactory implements ExecutorFactory {
 	
 	@Override
