@@ -7,6 +7,31 @@ import static org.bazinga.common.protocol.BazingaProtocol.PUBLISH_SERVICE;
 import static org.bazinga.common.protocol.BazingaProtocol.SUBSCRIBE_SERVICE;
 import static org.bazinga.common.serialization.SerializerHolder.serializerImpl;
 import static org.bazinga.common.utils.Constants.READER_IDLE_TIME_SECONDS;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.ChannelMatcher;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.handler.codec.ReplayingDecoder;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.internal.ConcurrentSet;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -35,35 +60,10 @@ import org.bazinga.common.message.SubScribeInfo;
 import org.bazinga.common.protocol.BazingaProtocol;
 import org.bazinga.common.transport.netty.NettyAcceptor;
 import org.bazinga.common.trigger.AcceptorIdleStateTrigger;
+import org.bazinga.common.utils.JUnsafe;
 import org.bazinga.common.utils.NativeSupport;
 import org.bazinga.common.utils.SystemClock;
 import org.bazinga.registry.registryInfo.RegistryContext;
-
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.ChannelMatcher;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.handler.codec.ReplayingDecoder;
-import io.netty.util.Attribute;
-import io.netty.util.AttributeKey;
-import io.netty.util.concurrent.GlobalEventExecutor;
-import io.netty.util.internal.ConcurrentSet;
 
 /**
  * 注册端
@@ -106,6 +106,88 @@ public class DefaultRegistryServer extends NettyAcceptor implements RegistryServ
 		nativeEt = true;
 		init();
     }
+	
+	public DefaultRegistryServer(int port,int worker) {
+		super(new InetSocketAddress(port),worker);
+		nativeEt = true;
+		init();
+    }
+	
+	@Override
+	protected void init() {
+		super.init();
+		ServerBootstrap boot = bootstrap();
+		
+		boot.option(ChannelOption.SO_BACKLOG, 1024);
+        boot.option(ChannelOption.SO_REUSEADDR, true);
+        
+        boot.childOption(ChannelOption.SO_REUSEADDR, true)
+        .childOption(ChannelOption.SO_KEEPALIVE, true)
+        .childOption(ChannelOption.TCP_NODELAY, true)
+        .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
+        
+	}
+	
+	
+	@Override
+	protected EventLoopGroup initEventLoopGroup(int workers,ThreadFactory bossFactory) {
+		return isNativeEt() ? new EpollEventLoopGroup(workers, bossFactory) : new NioEventLoopGroup(workers, bossFactory);
+	}
+
+	private boolean isNativeEt() {
+		return nativeEt && NativeSupport.isSupportNativeET();
+	}
+
+	@Override
+	protected ChannelFuture bind(SocketAddress localAddress) {
+		ServerBootstrap boot = bootstrap();
+
+        if (isNativeEt()) {
+            boot.channel(EpollServerSocketChannel.class);
+        } else {
+            boot.channel(NioServerSocketChannel.class);
+        }
+        boot.childHandler(new ChannelInitializer<SocketChannel>() {
+
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+            	ch.pipeline().addLast(
+            			new IdleStateChecker(timer, READER_IDLE_TIME_SECONDS, 0, 0),
+            			idleStateTrigger
+            			,messageEncoder
+            			,ackEncoder
+            			,new MessageDecoder()
+            			,messageHandler);
+            }
+        });
+
+        setOptions();
+
+        return boot.bind(localAddress);
+	}
+
+	private void setOptions() {
+		ServerBootstrap boot = bootstrap();
+
+        // parent options
+        boot.option(ChannelOption.SO_BACKLOG, 1024);
+        boot.option(ChannelOption.SO_REUSEADDR, true);
+
+        // child options
+        boot.childOption(ChannelOption.SO_REUSEADDR, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
+	}
+
+	@Override
+	public void startRegistryServer() {
+		try {
+            start();
+        } catch (InterruptedException e) {
+            JUnsafe.throwException(e);
+        }
+	}
 	
 	@ChannelHandler.Sharable
     class MessageHandler extends ChannelInboundHandlerAdapter {
@@ -548,63 +630,5 @@ public class DefaultRegistryServer extends NettyAcceptor implements RegistryServ
         t.setDaemon(true);
         t.start();
 	}
-
-	@Override
-	protected EventLoopGroup initEventLoopGroup(int workers,ThreadFactory bossFactory) {
-		return isNativeEt() ? new EpollEventLoopGroup(workers, bossFactory) : new NioEventLoopGroup(workers, bossFactory);
-	}
-
-	private boolean isNativeEt() {
-		return nativeEt && NativeSupport.isSupportNativeET();
-	}
-
-	@Override
-	protected ChannelFuture bind(SocketAddress localAddress) {
-		ServerBootstrap boot = bootstrap();
-
-        if (isNativeEt()) {
-            boot.channel(EpollServerSocketChannel.class);
-        } else {
-            boot.channel(NioServerSocketChannel.class);
-        }
-        boot.childHandler(new ChannelInitializer<SocketChannel>() {
-
-            @Override
-            protected void initChannel(SocketChannel ch) throws Exception {
-            	ch.pipeline().addLast(
-            			new IdleStateChecker(timer, READER_IDLE_TIME_SECONDS, 0, 0),
-            			idleStateTrigger
-            			,messageEncoder
-            			,ackEncoder
-            			,new MessageDecoder()
-            			,messageHandler);
-            }
-        });
-
-        setOptions();
-
-        return boot.bind(localAddress);
-	}
-
-	private void setOptions() {
-		ServerBootstrap boot = bootstrap();
-
-        // parent options
-        boot.option(ChannelOption.SO_BACKLOG, 1024);
-        boot.option(ChannelOption.SO_REUSEADDR, true);
-
-        // child options
-        boot.childOption(ChannelOption.SO_REUSEADDR, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.TCP_NODELAY, true)
-                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
-	}
-
-	@Override
-	public void startRegistryServer() {
-		
-	}
-	
-	
 
 }

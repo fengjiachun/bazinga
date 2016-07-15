@@ -77,7 +77,6 @@ public class BenchmarkClient {
 		 *  真实的生产环境下，服务提供者会根据自己的能力给出自己单台服务器的链接数，因为在服务端的netty模型中，worker的线程数是Available CPU<<1
 		 *  消费端对单台服务就去连接消费端available CPU的个数去连接
 		 *  这样测试的性能最高
-		 *  疑问：真实的生产场景下需要进行这么多的链接吗？加入provider有10台实例，一台实例4个链接，就有40个链接
 		 * UnresolvedAddress[] addresses = new UnresolvedAddress[processors];
          * for (int i = 0; i < processors; i++) {
          *  addresses[i] = new UnresolvedAddress("127.0.0.1", 18099);

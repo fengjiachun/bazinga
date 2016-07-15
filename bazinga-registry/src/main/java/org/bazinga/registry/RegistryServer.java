@@ -11,7 +11,7 @@ import org.bazinga.common.utils.JUnsafe;
 import org.bazinga.common.utils.SystemPropertyUtil;
 
 
-public interface RegistryServer {
+public interface RegistryServer extends RegistryMonitor {
 	
 	void startRegistryServer();
 	
@@ -29,7 +29,7 @@ public interface RegistryServer {
 			Class<RegistryServer> cls;
 			
 			try {
-				cls = (Class<RegistryServer>)Class.forName(SystemPropertyUtil.get("bazinga.registry.default", "org.jupiter.registry.DefaultRegistryServer"));
+				cls = (Class<RegistryServer>)Class.forName(SystemPropertyUtil.get("bazinga.registry.default", "org.bazinga.registry.DefaultRegistryServer"));
 			} catch (Exception e) {
 				cls = null;
 			}

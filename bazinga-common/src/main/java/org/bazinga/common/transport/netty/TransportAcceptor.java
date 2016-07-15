@@ -12,8 +12,6 @@ public interface TransportAcceptor {
 	
 	SocketAddress localAddress();
 	
-	ConfigGroup configGroup();
-	
 	void start() throws InterruptedException;
 	
 	void start(boolean sync) throws InterruptedException;

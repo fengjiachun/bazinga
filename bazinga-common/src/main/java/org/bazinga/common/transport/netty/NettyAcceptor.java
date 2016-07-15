@@ -1,14 +1,6 @@
 package org.bazinga.common.transport.netty;
 
 import static org.bazinga.common.utils.Constants.AVAILABLE_PROCESSORS;
-
-import java.net.SocketAddress;
-import java.util.concurrent.ThreadFactory;
-
-import org.bazinga.common.logger.InternalLogger;
-import org.bazinga.common.logger.InternalLoggerFactory;
-import org.bazinga.common.utils.NamedThreadFactory;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -21,6 +13,13 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.internal.PlatformDependent;
+
+import java.net.SocketAddress;
+import java.util.concurrent.ThreadFactory;
+
+import org.bazinga.common.logger.InternalLogger;
+import org.bazinga.common.logger.InternalLoggerFactory;
+import org.bazinga.common.utils.NamedThreadFactory;
 
 
 /**
@@ -53,7 +52,6 @@ public abstract class NettyAcceptor implements TransportAcceptor {
     public NettyAcceptor(SocketAddress localAddress, int nWorkers) {
         this.localAddress = localAddress;
         this.nWorkers = nWorkers;
-        init();
     }
     
     //默认的一些公用的netty的配置参数或者一些线程配置
@@ -82,17 +80,11 @@ public abstract class NettyAcceptor implements TransportAcceptor {
         }
     }
 
-	protected abstract EventLoopGroup initEventLoopGroup(int i, ThreadFactory bossFactory);
+	protected abstract EventLoopGroup initEventLoopGroup(int worker, ThreadFactory bossFactory);
 
 	@Override
 	public SocketAddress localAddress() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ConfigGroup configGroup() {
-		return null;
+		return localAddress;
 	}
 
 	@Override
