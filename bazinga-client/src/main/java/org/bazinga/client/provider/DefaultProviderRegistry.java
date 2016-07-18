@@ -46,7 +46,10 @@ import org.bazinga.common.utils.NativeSupport;
 import org.bazinga.common.utils.SystemClock;
 
 /**
- * provider端代码
+ * provider端向registry端注册的connector
+ * @author BazingaLyn
+ *
+ * @time
  */
 public class DefaultProviderRegistry extends NettyConnector implements Registry {
 

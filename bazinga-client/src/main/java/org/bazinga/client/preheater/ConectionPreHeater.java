@@ -15,6 +15,7 @@ import org.bazinga.common.utils.SystemClock;
 /**
  * 链接越热工具，模仿getresult时的promise的方式
  * @author BazingaLyn
+ * @copyright fjc
  * @time 2016年6月14日
  */
 public class ConectionPreHeater {

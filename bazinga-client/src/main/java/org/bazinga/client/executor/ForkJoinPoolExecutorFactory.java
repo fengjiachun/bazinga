@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2015 The Jupiter Project
- *
- * Licensed under the Apache License, version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.bazinga.client.executor;
 
 import java.util.concurrent.Executor;
@@ -25,12 +9,10 @@ import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 
 /**
- * Provide a {@link ForkJoinPool} implementation of executor.
- *
- * jupiter
- * org.jupiter.rpc.executor
- *
- * @author jiachun.fjc
+ * 
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time
  */
 public class ForkJoinPoolExecutorFactory implements ExecutorFactory {
 
@@ -55,7 +37,6 @@ public class ForkJoinPoolExecutorFactory implements ExecutorFactory {
 
         @Override
         public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-            // Note: The ForkJoinPool will create these threads as daemon threads.
             ForkJoinWorkerThread thread = new DefaultForkJoinWorkerThread(pool);
             thread.setName(namePrefix + '-' + idx.getAndIncrement());
             return thread;

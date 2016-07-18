@@ -5,6 +5,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * 一个服务对应的多个channelGroup
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time 2016年7月15日
+ */
 public class ServiceBChannelGroup {
 	
 	private static final ConcurrentMap<String, CopyOnWriteGroupList> groups = new ConcurrentHashMap<String, ServiceBChannelGroup.CopyOnWriteGroupList>();
@@ -28,9 +34,9 @@ public class ServiceBChannelGroup {
 	
 	public static class CopyOnWriteGroupList extends CopyOnWriteArrayList<BChannelGroup> {
 
-        private static final long serialVersionUID = -666607632499368496L;
+		private static final long serialVersionUID = -3687214483052404357L;
 
-        @Override
+		@Override
         public boolean addIfAbsent(BChannelGroup group) {
             boolean added = super.addIfAbsent(group);
             if (added) {

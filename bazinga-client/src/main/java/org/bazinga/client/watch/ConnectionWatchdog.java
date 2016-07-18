@@ -19,6 +19,12 @@ import org.bazinga.common.group.BChannelGroup;
 import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 
+/**
+ * 监控重连狗
+ * @author BazingaLyn
+ *
+ * @time
+ */
 @ChannelHandler.Sharable
 public abstract class ConnectionWatchdog extends ChannelInboundHandlerAdapter implements TimerTask, ChannelHandlerHolder {
 

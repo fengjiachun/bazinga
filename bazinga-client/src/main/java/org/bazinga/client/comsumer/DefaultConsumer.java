@@ -4,6 +4,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.bazinga.common.utils.Constants.AVAILABLE_PROCESSORS;
 import static org.bazinga.common.utils.Constants.NO_AVAILABLE_WRITEBUFFER_HIGHWATERMARK;
 import static org.bazinga.common.utils.Constants.NO_AVAILABLE_WRITEBUFFER_LOWWATERMARK;
+import static org.bazinga.common.utils.Constants.WRITER_IDLE_TIME_SECONDS;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
@@ -40,12 +41,20 @@ import org.bazinga.common.utils.NativeSupport;
 
 
 /**
- * 
- * 默认的消费者端
+ * DefaultConsumer是consumer端连接provider端的Client端，继承DefaultConsumerRegistry
+ *  因为DefaultConsumerRegistry连接registry后返回某服务需要连接的IP:HOST,这样就能直接调用
+ *  @{link DefaultConsumer #connectToProvider}的方法了
+ *  
+ *  但这样做的缺点也很明显：无法复用NettyConnector
+ *  
+ * @author BazingaLyn
+ * @time 2016年7月18日
  */
 public class DefaultConsumer extends DefaultConsumerRegistry {
 	
 	private RequestEncoder encoder = new RequestEncoder();
+	
+	//consumer消费provider端返回的response的handler
 	private ConsumerHandler handler = new ConsumerHandler(new DefaultConsumerProcessor());
 	
 	protected final HashedWheelTimer timer = new HashedWheelTimer(new NamedThreadFactory("consumer.timer"));
@@ -60,8 +69,6 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
     protected volatile ByteBufAllocator allocator;
     
     private final ConnectorIdleStateTrigger idleStateTrigger = new ConnectorIdleStateTrigger();
-    
-    public static final int WRITER_IDLE_TIME_SECONDS = 30;
     
     private volatile int writeBufferHighWaterMark = -1;
     private volatile int writeBufferLowWaterMark = -1;
@@ -81,6 +88,7 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 	}
 	
 	private void init() {
+		
 		ThreadFactory workerFactory = new DefaultThreadFactory("bazinga.connector");
         worker = initEventLoopGroup(nWorkers, workerFactory);
         
@@ -119,8 +127,6 @@ public class DefaultConsumer extends DefaultConsumerRegistry {
 
 
 	public Channel connectToProvider(int port, String host) {
-		
-		//TODO 这边需要判断是否每次都需要进行重连
 		
 		final Bootstrap boot = bootstrap();
 		

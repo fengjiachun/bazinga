@@ -9,6 +9,12 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 import org.bazinga.common.message.Request;
 
+/**
+ * 
+ * @author BazingaLyn
+ * 
+ * @time
+ */
 @ChannelHandler.Sharable
 public class RequestEncoder extends MessageToByteEncoder<Request>{
 

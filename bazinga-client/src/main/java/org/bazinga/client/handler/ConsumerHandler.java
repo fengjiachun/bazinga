@@ -13,6 +13,12 @@ import org.bazinga.common.logger.InternalLogger;
 import org.bazinga.common.logger.InternalLoggerFactory;
 import org.bazinga.common.message.Response;
 
+/**
+ * ConsumerHandler 用来处理provider端返回的response
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time
+ */
 @Sharable
 public class ConsumerHandler extends ChannelInboundHandlerAdapter {
 	

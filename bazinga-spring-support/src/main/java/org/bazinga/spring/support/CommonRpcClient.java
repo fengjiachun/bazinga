@@ -9,6 +9,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * 消费者端对spring的支持
+ * @state 未完成 TODO
  * @author BazingaLyn
  *
  * @time

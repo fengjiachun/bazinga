@@ -12,8 +12,10 @@ import org.bazinga.common.message.RegistryInfo.Address;
 import org.bazinga.common.message.RegistryInfo.RpcService;
 
 /**
- * 
- *
+ * registry端保存在内存中的一些信息，部分功能没有完成，与monitor的功能一起完成
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time
  */
 public class RegistryContext {
 	

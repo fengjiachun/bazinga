@@ -10,8 +10,9 @@ import org.bazinga.common.message.RegistryInfo.Address;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * 
- * @author BazingaLyn 说明：提供者对spring的支持
+ *  说明：提供者对spring的支持
+ * @state 未完成 TODO
+ * @author BazingaLyn 
  * @time 2016年6月24日
  */
 public class CommonRpcProvider implements InitializingBean {

@@ -7,7 +7,7 @@ import org.bazinga.common.message.Request;
 /**
  * 提供者的处理器
  * @author BazingaLyn
- *
+ * @copyright fjc
  * @time 2016年6月25日
  */
 public interface ProviderProcessor extends LookupService {

@@ -2,15 +2,20 @@ package org.bazinga.common.message;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import static org.bazinga.common.utils.Constants.DEFAULT_APP_NAME;
 
+/**
+ * 
+ * @author BazingaLyn
+ * @copyright fjc
+ * @time 2016年7月13日
+ */
 public class RequestMessageWrapper implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6268712308008868137L;
-	
-	private static final String DEFAULT_APP_NAME = "bazinga";
 	
 	private String appName;
 	

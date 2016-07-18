@@ -8,7 +8,12 @@ import java.util.concurrent.ThreadFactory;
 
 import org.bazinga.common.transport.netty.NettyAcceptor;
 import org.bazinga.registry.RegistryMonitor;
-
+/**
+ * 
+ * @author BazingaLyn
+ * TODO monitor端未做
+ * @time 2016年7月12日
+ */
 public class MonitorServer extends NettyAcceptor {
 	
 	private volatile RegistryMonitor registryMonitor;

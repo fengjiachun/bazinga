@@ -37,4 +37,7 @@ public class Constants {
     
     /** Suggest that the count of connections **/
     public static final int DEFAULT_CONNECTION_COUNT = SystemPropertyUtil.getInt("bazinga.suggest.connection.count", AVAILABLE_PROCESSORS);
+    
+    
+    public static final String DEFAULT_APP_NAME = SystemPropertyUtil.get("bazinga.default.app.name", "bazinga");
 }

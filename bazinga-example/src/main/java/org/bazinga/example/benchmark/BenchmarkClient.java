@@ -49,8 +49,8 @@ public class BenchmarkClient {
 		servicesNames.add("BAZINGA.NM.DEMOSERVICE.SAYHELLO");
 		info.setServiceNames(servicesNames);
 		final CommonClient commonClient = new CommonClient(info, WRITE_BUFFER_HIGH_WATER_MARK, WRITE_BUFFER_LOW_WATER_MARK);
-		//172.31.2.206
-		commonClient.connectToRegistryServer(8080, "172.31.2.206");
+		//remote 172.31.2.206
+		commonClient.connectToRegistryServer(8080, "127.0.0.1");
 
 		/**
 		 * 因为这是性能极限测试，TCP协议是慢启动的，滑窗的大小是逐渐变大，并且趋于稳定的，
@@ -91,7 +91,7 @@ public class BenchmarkClient {
 				public void run() {
 					for (int i = 0; i < t; i++) {
 						try {
-							commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "jupiter");
+							commonClient.call("BAZINGA.NM.DEMOSERVICE.SAYHELLO", "bazinga");
 
 							if (count.getAndIncrement() % 50000 == 0) {
 								logger.info("count=" + count.get());

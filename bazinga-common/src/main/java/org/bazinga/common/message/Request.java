@@ -2,6 +2,12 @@ package org.bazinga.common.message;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * consumer端调用provider端的请求体
+ * @author BazingaLyn
+ *
+ * @time
+ */
 public class Request extends BytesHolder {
 	
 	private static final AtomicLong invokeIdGenerator = new AtomicLong(0);

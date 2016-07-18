@@ -57,10 +57,10 @@ import org.bazinga.common.utils.NamedThreadFactory;
 import org.bazinga.common.utils.NativeSupport;
 
 /**
- * 消费端向monitor端注册所需的服务
+ * 消费端向registry端注册所需的服务
  * @author BazingaLyn
  * @copyright fjc
- * @time
+ * @time 2016年5月30日
  */
 public abstract class DefaultConsumerRegistry extends AbstractCommonClient implements Registry {
 
@@ -71,7 +71,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 
 	private MessageEncoder messageEncoder = new MessageEncoder();
 
-	private ConsumerRegistryHandler consumerHandler = new ConsumerRegistryHandler();
+	//像registry端注册交互的handler
+	private ConsumerRegistryHandler consumerRegistryHandler = new ConsumerRegistryHandler();
 	
 	private final AcknowledgeEncoder ackEncoder = new AcknowledgeEncoder();
 
@@ -107,11 +108,15 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 			((NioEventLoopGroup) worker).setIoRatio(100);
 		}
 
-		bootstrap.option(ChannelOption.ALLOCATOR, allocator).option(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
-				.option(ChannelOption.SO_REUSEADDR, true).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) SECONDS.toMillis(3))
-				.channel(NioSocketChannel.class);
+		bootstrap.option(ChannelOption.ALLOCATOR, allocator)
+		         .option(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
+		         .option(ChannelOption.SO_REUSEADDR, true)
+		         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) SECONDS.toMillis(3))
+				 .channel(NioSocketChannel.class);
 
-		bootstrap.option(ChannelOption.SO_KEEPALIVE, true).option(ChannelOption.TCP_NODELAY, true).option(ChannelOption.ALLOW_HALF_CLOSURE, false);
+		bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
+		         .option(ChannelOption.TCP_NODELAY, true)
+		         .option(ChannelOption.ALLOW_HALF_CLOSURE, false);
 	}
 
 	private EventLoopGroup initEventLoopGroup(int nWorkers, ThreadFactory workerFactory) {
@@ -123,7 +128,6 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 	}
 
 	public void connectToRegistryServer(int port, String host) throws Exception {
-		
 
 		final Bootstrap boot = bootstrap();
 
@@ -139,7 +143,8 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 						messageEncoder,
 						ackEncoder,
 						new MessageDecoder(), 
-						consumerHandler };
+						consumerRegistryHandler 
+						};
 			}
 		};
 		watchdog.setReconnect(true);
@@ -191,7 +196,6 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
-			logger.info("/*********************begin decoder****************/");
 			switch (state()) {
 
 			case HEADER_MAGIC:
@@ -255,7 +259,6 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 		@Override
 		public void channelActive(ChannelHandlerContext ctx) throws Exception {
 
-			logger.debug("***********consumer has start**************");
 			logger.info("consumer msg :{}", info);
 
 			Channel channel = ctx.channel();
@@ -297,7 +300,7 @@ public abstract class DefaultConsumerRegistry extends AbstractCommonClient imple
 						
 						logger.info("get service {}",serviceName);
 						
-						if(null == list || list.size() ==0){
+						if(null == list || list.size() == 0){
 							return;
 						}
 						
