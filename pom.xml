@@ -5,6 +5,7 @@
 	<artifactId>bazinga</artifactId>
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
+	
 	<modules>
 		<module>bazinga-common</module>
 		<module>bazinga-client</module>

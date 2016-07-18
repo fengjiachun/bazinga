@@ -15,7 +15,7 @@
  [selector源码解析](http://zhhphappy.iteye.com/blog/2032893)
 
 
-##2) promise设计模式
+##2) 设计模式
 
 
 
